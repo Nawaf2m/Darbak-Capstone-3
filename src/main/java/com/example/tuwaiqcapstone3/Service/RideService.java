@@ -1,8 +1,11 @@
 package com.example.tuwaiqcapstone3.Service;
 
-import com.example.tuwaiqcapstone3.api.ApiException;
+import com.example.tuwaiqcapstone3.API.ApiException;
+import com.example.tuwaiqcapstone3.Model.Car;
 import com.example.tuwaiqcapstone3.Model.Ride;
+import com.example.tuwaiqcapstone3.Repository.CarRepository;
 import com.example.tuwaiqcapstone3.Repository.RideRepository;
+import com.example.tuwaiqcapstone3.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
