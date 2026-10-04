@@ -7,4 +7,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface RidePerticipantRepository extends JpaRepository<RidePerticipant,Integer> {
     RidePerticipant findRidePerticipantById(Integer id);
+
+    boolean existsByRideIdAndUserId(Integer rideId, Integer userId);
+
 }
