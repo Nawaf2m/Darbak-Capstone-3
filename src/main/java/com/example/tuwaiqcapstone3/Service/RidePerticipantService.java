@@ -1,6 +1,6 @@
 package com.example.tuwaiqcapstone3.Service;
 
-import com.example.tuwaiqcapstone3.api.ApiException;
+import com.example.tuwaiqcapstone3.API.ApiException;
 import com.example.tuwaiqcapstone3.Model.Ride;
 import com.example.tuwaiqcapstone3.Model.RidePerticipant;
 import com.example.tuwaiqcapstone3.Model.User;
