@@ -1,4 +1,4 @@
-package com.example.tuwaiqcapstone3.api;
+package com.example.tuwaiqcapstone3.API;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -6,5 +6,6 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class ApiResponse {
-    private String massage;
+
+    private String message;
 }
