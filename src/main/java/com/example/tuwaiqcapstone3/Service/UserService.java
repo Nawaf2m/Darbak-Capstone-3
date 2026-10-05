@@ -1,13 +1,16 @@
 package com.example.tuwaiqcapstone3.Service;
 
 import com.example.tuwaiqcapstone3.API.ApiException;
+import com.example.tuwaiqcapstone3.DTO.UserMatchStatsDTO;
+import com.example.tuwaiqcapstone3.DTO.UserRideStatsDTO;
 import com.example.tuwaiqcapstone3.Model.Match;
+import com.example.tuwaiqcapstone3.Model.Ride;
 import com.example.tuwaiqcapstone3.Model.User;
-import com.example.tuwaiqcapstone3.Repository.MatchRepository;
-import com.example.tuwaiqcapstone3.Repository.UserRepository;
+import com.example.tuwaiqcapstone3.Repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +21,11 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final MatchRepository matchRepository;
+    private final ReviewRepository reviewRepository;
+    private final RideRepository rideRepository;
+    private final RidePerticipantRepository ridePerticipantRepository;
+
+
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
@@ -34,24 +42,42 @@ public class UserService {
         return user;
     }
 
-    public void addUser(User user) {
-
-        User checkEmail = userRepository.findUserByEmail(user.getEmail());
-
-        if (checkEmail != null) {
-            throw new ApiException("email already exists");
+    public void register(User user) {
+        if (userRepository.existsByEmail(user.getEmail())) {
+            throw new ApiException("Email is already registered");
         }
-
-        User checkPhone = userRepository.findUserByPhoneNumber(user.getPhoneNumber());
-
-        if (checkPhone != null) {
-            throw new ApiException("phone number already exists");
+        if (userRepository.existsByPhoneNumber(user.getPhoneNumber())) {
+            throw new ApiException("Phone number is already registered");
         }
-
         user.setCreatedAt(LocalDateTime.now());
-
         userRepository.save(user);
     }
+
+    public void login(String email, String password) {
+        User user = userRepository.findUserByEmail(email);
+        if (user == null || !user.getPassword().equals(password)) {
+            throw new ApiException("Invalid email or password");
+        }
+    }
+
+//    public void addUser(User user) {
+//
+//        User checkEmail = userRepository.findUserByEmail(user.getEmail());
+//
+//        if (checkEmail != null) {
+//            throw new ApiException("email already exists");
+//        }
+//
+//        User checkPhone = userRepository.findUserByPhoneNumber(user.getPhoneNumber());
+//
+//        if (checkPhone != null) {
+//            throw new ApiException("phone number already exists");
+//        }
+//
+//        user.setCreatedAt(LocalDateTime.now());
+//
+//        userRepository.save(user);
+//    }
 
     public void updateUser(Integer id, User user) {
 
@@ -126,6 +152,57 @@ public class UserService {
         }
 
         userRepository.save(user);
+    }
+
+    public List<User> searchByName(String name) {
+        List<User> users = userRepository.findUsersByNameContainingIgnoreCase(name);
+        if (users.isEmpty()) {
+            throw new ApiException("No users found with this name");
+        }
+        return users;
+    }
+
+    public List<User> getUsersAboveAverageRating() {
+        return userRepository.findUsersAboveAverageRating();
+    }
+
+    public List<User> getUsersBelowAverageRating() {
+        return userRepository.findUsersBelowAverageRating();
+    }
+
+    public Double getUserAverageRating(Integer userId) {
+        getUserById(userId);
+        Double avg = reviewRepository.findAverageRatingByUserId(userId);
+        if (avg == null) {
+            return 0.0;
+        }
+        return avg;
+    }
+
+    // 8. User's ride statistics
+    public UserRideStatsDTO getUserRideStatistics(Integer userId) {
+        getUserById(userId);
+        return new UserRideStatsDTO(
+                rideRepository.countByDriverId(userId),
+                rideRepository.countByDriverIdAndStatus(userId, "completed"),
+                rideRepository.countByDriverIdAndStatus(userId, "cancelled"),
+                ridePerticipantRepository.countRidesAsPassenger(userId),
+                ridePerticipantRepository.countRidesAsPassengerByStatus(userId, "completed")
+        );
+    }
+
+    // 9. User's match statistics (matches he is connected to through his rides)
+    public UserMatchStatsDTO getUserMatchStatistics(Integer userId) {
+        getUserById(userId);
+        Integer total = rideRepository.countMatchesByUserId(userId);
+        Integer upcoming = rideRepository.countUpcomingMatchesByUserId(userId, LocalDateTime.now());
+        return new UserMatchStatsDTO(total, upcoming, total - upcoming);
+    }
+
+    // 10. User's upcoming rides
+    public List<Ride> getUserUpcomingRides(Integer userId) {
+        getUserById(userId);
+        return rideRepository.findUpcomingRidesByUserId(userId, LocalDate.now());
     }
 
 }

@@ -25,12 +25,24 @@ public class UserController {
         return ResponseEntity.status(200).body(userService.getUserById(id));
     }
 
-    @PostMapping("/add")
-    public ResponseEntity<?> addUser(@RequestBody @Valid User user) {
-        userService.addUser(user);
-        return ResponseEntity.status(200)
-                .body(new ApiResponse("user added successfully"));
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody @Valid User user) {
+        userService.register(user);
+        return ResponseEntity.status(200).body(new ApiResponse("User registered successfully"));
     }
+
+    @PostMapping("/login/{email}/{password}")
+    public ResponseEntity<?> login(@PathVariable String email, @PathVariable String password) {
+        userService.login(email, password);
+        return ResponseEntity.status(200).body(new ApiResponse("Login successful"));
+    }
+
+//    @PostMapping("/add")
+//    public ResponseEntity<?> addUser(@RequestBody @Valid User user) {
+//        userService.addUser(user);
+//        return ResponseEntity.status(200)
+//                .body(new ApiResponse("user added successfully"));
+//    }
 
     @PutMapping("/update/{id}")
     public ResponseEntity<?> updateUser(@PathVariable Integer id, @RequestBody @Valid User user) {
@@ -61,5 +73,40 @@ public class UserController {
         userService.deleteUser(id);
 
         return ResponseEntity.status(200).body(new ApiResponse("user deleted successfully"));
+    }
+
+    @GetMapping("/search/{name}")
+    public ResponseEntity<?> searchByName(@PathVariable String name) {
+        return ResponseEntity.status(200).body(userService.searchByName(name));
+    }
+
+    @GetMapping("/above-average-rating")
+    public ResponseEntity<?> getUsersAboveAverageRating() {
+        return ResponseEntity.status(200).body(userService.getUsersAboveAverageRating());
+    }
+
+    @GetMapping("/below-average-rating")
+    public ResponseEntity<?> getUsersBelowAverageRating() {
+        return ResponseEntity.status(200).body(userService.getUsersBelowAverageRating());
+    }
+
+    @GetMapping("/average-rating/{userId}")
+    public ResponseEntity<?> getUserAverageRating(@PathVariable Integer userId) {
+        return ResponseEntity.status(200).body(userService.getUserAverageRating(userId));
+    }
+
+    @GetMapping("/ride-statistics/{userId}")
+    public ResponseEntity<?> getUserRideStatistics(@PathVariable Integer userId) {
+        return ResponseEntity.status(200).body(userService.getUserRideStatistics(userId));
+    }
+
+    @GetMapping("/match-statistics/{userId}")
+    public ResponseEntity<?> getUserMatchStatistics(@PathVariable Integer userId) {
+        return ResponseEntity.status(200).body(userService.getUserMatchStatistics(userId));
+    }
+
+    @GetMapping("/upcoming-rides/{userId}")
+    public ResponseEntity<?> getUserUpcomingRides(@PathVariable Integer userId) {
+        return ResponseEntity.status(200).body(userService.getUserUpcomingRides(userId));
     }
 }
