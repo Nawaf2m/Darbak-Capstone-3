@@ -12,6 +12,7 @@ import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Getter
@@ -72,9 +73,13 @@ public class User {
     private Set<RideRequest> rideRequests;
 
 
-    @OneToMany(mappedBy = "user")
+    @ManyToMany
+    @JoinTable(name = "user_matches",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "match_id"),
+            uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "match_id"}))
     @JsonIgnore
-    private Set<UserMatch> userMatches;
+    private Set<Match> matches = new HashSet<>();
 
 
     @OneToMany(mappedBy = "reviewer")

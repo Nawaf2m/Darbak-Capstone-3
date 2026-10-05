@@ -39,6 +39,23 @@ public class UserController {
         return ResponseEntity.status(200).body(new ApiResponse("user updated successfully"));
     }
 
+    @GetMapping("/{userId}/matches")
+    public ResponseEntity<?> getUserMatches(@PathVariable Integer userId) {
+        return ResponseEntity.status(200).body(userService.getUserMatches(userId));
+    }
+
+    @PostMapping("/{userId}/matches/{matchId}")
+    public ResponseEntity<?> addMatchToUser(@PathVariable Integer userId, @PathVariable Integer matchId) {
+        userService.addMatchToUser(userId, matchId);
+        return ResponseEntity.status(200).body(new ApiResponse("user match added successfully"));
+    }
+
+    @DeleteMapping("/{userId}/matches/{matchId}")
+    public ResponseEntity<?> removeMatchFromUser(@PathVariable Integer userId, @PathVariable Integer matchId) {
+        userService.removeMatchFromUser(userId, matchId);
+        return ResponseEntity.status(200).body(new ApiResponse("user match deleted successfully"));
+    }
+
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable Integer id) {
         userService.deleteUser(id);
