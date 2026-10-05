@@ -6,11 +6,10 @@ import com.example.tuwaiqcapstone3.Model.Stadium;
 import com.example.tuwaiqcapstone3.Model.User;
 import com.example.tuwaiqcapstone3.Repository.MatchRepository;
 import com.example.tuwaiqcapstone3.Repository.StadiumRepository;
+import com.example.tuwaiqcapstone3.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -19,6 +18,7 @@ public class MatchService {
 
     private final MatchRepository matchRepository;
     private final StadiumRepository stadiumRepository;
+    private final UserRepository userRepository;
 
     public List<Match> getMatches() {
         return matchRepository.findAll();
@@ -62,7 +62,6 @@ public class MatchService {
         matchRepository.save(oldMatch);
     }
 
-    @Transactional
     public void deleteMatch(Integer id) {
         Match match = matchRepository.findMatchById(id);
 
@@ -70,10 +69,11 @@ public class MatchService {
             throw new ApiException("match not found");
         }
 
-        for (User user : new HashSet<>(match.getUsers())) {
-            user.getMatches().remove(match);
+        List<User> users = userRepository.findDistinctByMatches_Id(id);
+        for (User user : users) {
+            user.getMatches().removeIf(savedMatch -> savedMatch.getId().equals(id));
         }
-        match.getUsers().clear();
+        userRepository.saveAll(users);
         matchRepository.delete(match);
     }
 

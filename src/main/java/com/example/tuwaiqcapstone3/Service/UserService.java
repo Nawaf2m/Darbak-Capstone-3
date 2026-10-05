@@ -7,7 +7,6 @@ import com.example.tuwaiqcapstone3.Repository.MatchRepository;
 import com.example.tuwaiqcapstone3.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -82,7 +81,6 @@ public class UserService {
         userRepository.save(oldUser);
     }
 
-    @Transactional
     public void deleteUser(Integer id) {
 
         User user = userRepository.findUserById(id);
@@ -91,17 +89,14 @@ public class UserService {
             throw new ApiException("user not found");
         }
 
-        user.getMatches().clear();
         userRepository.delete(user);
     }
 
-    @Transactional(readOnly = true)
     public List<Match> getUserMatches(Integer userId) {
         User user = getUserById(userId);
         return new ArrayList<>(user.getMatches());
     }
 
-    @Transactional
     public void addMatchToUser(Integer userId, Integer matchId) {
         User user = getUserById(userId);
         Match match = matchRepository.findMatchById(matchId);
@@ -110,15 +105,14 @@ public class UserService {
             throw new ApiException("match not found");
         }
 
-        if (!user.getMatches().add(match)) {
+        if (user.getMatches().stream().anyMatch(savedMatch -> savedMatch.getId().equals(matchId))) {
             throw new ApiException("user match already exists");
         }
 
-        match.getUsers().add(user);
+        user.getMatches().add(match);
         userRepository.save(user);
     }
 
-    @Transactional
     public void removeMatchFromUser(Integer userId, Integer matchId) {
         User user = getUserById(userId);
         Match match = matchRepository.findMatchById(matchId);
@@ -127,11 +121,11 @@ public class UserService {
             throw new ApiException("match not found");
         }
 
-        if (!user.getMatches().remove(match)) {
+        if (!user.getMatches().removeIf(savedMatch -> savedMatch.getId().equals(matchId))) {
             throw new ApiException("user match not found");
         }
 
-        match.getUsers().remove(user);
         userRepository.save(user);
     }
+
 }
