@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -52,6 +53,7 @@ public class Admin {
     @Column(columnDefinition = "varchar(15) not null unique")
     private String phone;
 
-    @Column(columnDefinition = "timestamp default current_timestamp")
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 }

@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -26,26 +27,28 @@ public class Review {
     @NotNull
     @Min(value = 1, message = "Rating must be at least 1")
     @Max(value = 5, message = "Rating must be at most 5")
-    @Column(columnDefinition = " int not null")
+    @Column(nullable = false)
     private Integer rating;
 
     @Size(max = 200, message = "Comment must be at most 200 characters")
     @Column(columnDefinition = "varchar(200) ")
     private String comment;
 
-    @Column(columnDefinition = "timestamp default current_timestamp")
+
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
 
     @ManyToOne
-    @JoinColumn
+    @JoinColumn(nullable = false)
     private User reviewer;
 
     @ManyToOne
-    @JoinColumn
+    @JoinColumn(nullable = false)
     private User reviewedUser;
 
     @ManyToOne
-    @JoinColumn
+    @JoinColumn(nullable = false)
     private Ride ride;
 }
