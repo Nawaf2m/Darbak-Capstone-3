@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -32,26 +33,44 @@ public class RideService {
         return rides;
     }
 
-    public void addRide(Ride ride){
+    public void addRide(Integer driver_id,Integer match_id,Integer car_id,Ride ride){
 
-        User user = userRepository.findUserById(ride.getDriver().getId());
+        User driver = userRepository.findUserById(driver_id);
 
-        if(user==null){
+        if(driver==null){
             throw new ApiException("driver id not found");
         }
 
-        Match match = matchRepository.findMatchById(ride.getMatch().getId());
+        Match match = matchRepository.findMatchById(match_id);
 
         if(match==null){
             throw new ApiException("match id not found");
         }
 
-        Car car = carRepository.findCarById(ride.getCar().getId());
+        Car car = carRepository.findCarById(car_id);
 
         if(car==null){
             throw new ApiException("car id not found");
         }
 
+        boolean found=false;
+        Set<Car> cars = driver.getCars();
+        for(Car i :cars){
+            if(i.getId().equals(car.getId())){
+                found =true;
+                break;
+            }
+        }
+        if(!found){
+            throw new ApiException("car dont belong to user");
+        }
+        if(ride.getAvailableSeats() > car.getSeatsCount()){
+            throw new ApiException("available seats cannot exceed car capacity");
+        }
+
+        ride.setDriver(driver);
+        ride.setMatch(match);
+        ride.setCar(car);
         ride.setStatus("available");
         rideRepository.save(ride);
     }
@@ -69,6 +88,10 @@ public class RideService {
         oldRide.setMeetingLatitude(ride.getMeetingLatitude());
         oldRide.setMeetingLongitude(ride.getMeetingLongitude());
         oldRide.setDestination(ride.getDestination());
+
+        if(ride.getAvailableSeats() > oldRide.getCar().getSeatsCount()){
+            throw new ApiException("available seats cannot exceed car capacity");
+        }
         oldRide.setAvailableSeats(ride.getAvailableSeats());
         oldRide.setNotes(ride.getNotes());
 

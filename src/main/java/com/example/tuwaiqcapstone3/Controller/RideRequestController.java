@@ -19,9 +19,9 @@ public class RideRequestController {
         return ResponseEntity.status(200).body(rideRequestService.getRideRequests());
     }
 
-    @PostMapping("/add")
-    public ResponseEntity<?> addRideRequest(@RequestBody @Valid RideRequest rideRequest){
-        rideRequestService.addRideRequest(rideRequest);
+    @PostMapping("/add/{user_id}/{ride_id}")
+    public ResponseEntity<?> addRideRequest(@PathVariable Integer user_id,@PathVariable Integer ride_id,@RequestBody @Valid RideRequest rideRequest){
+        rideRequestService.addRideRequest(user_id, ride_id, rideRequest);
 
         return ResponseEntity.status(200).body("ride request added successfully");
     }

@@ -29,20 +29,22 @@ public class RidePerticipantService {
         return ridePerticipants;
     }
 
-    public void addRidePerticipant(RidePerticipant ridePerticipant){
+    public void addRidePerticipant(Integer ride_id ,Integer user_id ,RidePerticipant ridePerticipant){
 
-        Ride ride = rideRepository.findRideById(ridePerticipant.getRide().getId());
+        Ride ride = rideRepository.findRideById(ride_id);
 
         if(ride==null){
             throw new ApiException("ride id not found");
         }
 
-        User user = userRepository.findUserById(ridePerticipant.getUser().getId());
+        User user = userRepository.findUserById(user_id);
 
         if(user==null){
             throw new ApiException("user id not found");
         }
 
+        ridePerticipant.setRide(ride);
+        ridePerticipant.setUser(user);
         ridePerticipantRepository.save(ridePerticipant);
     }
 

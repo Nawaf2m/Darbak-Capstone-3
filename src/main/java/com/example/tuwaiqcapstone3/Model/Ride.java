@@ -23,18 +23,18 @@ public class Ride {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn
+    @JoinColumn(nullable = false)
     @JsonIgnore
     private User driver;
 
 
     @ManyToOne
-    @JoinColumn
+    @JoinColumn(nullable = false)
     @JsonIgnore
     private Match match;
 
     @ManyToOne
-    @JoinColumn
+    @JoinColumn(nullable = false)
     @JsonIgnore
     private Car car;
 

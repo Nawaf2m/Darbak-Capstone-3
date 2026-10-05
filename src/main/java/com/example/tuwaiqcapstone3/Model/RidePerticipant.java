@@ -24,12 +24,12 @@ public class RidePerticipant {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn
+    @JoinColumn(nullable = false)
     @JsonIgnore
     private Ride ride;
 
     @ManyToOne
-    @JoinColumn
+    @JoinColumn(nullable = false)
     @JsonIgnore
     private User user;
 

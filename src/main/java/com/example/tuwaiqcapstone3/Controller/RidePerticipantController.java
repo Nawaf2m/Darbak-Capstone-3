@@ -19,9 +19,9 @@ public class RidePerticipantController {
         return ResponseEntity.status(200).body(ridePerticipantService.getRidePerticipants());
     }
 
-    @PostMapping("/add")
-    public ResponseEntity<?> addRidePerticipant(@RequestBody @Valid RidePerticipant ridePerticipant){
-        ridePerticipantService.addRidePerticipant(ridePerticipant);
+    @PostMapping("/add/{ride_id}/{user_id}")
+    public ResponseEntity<?> addRidePerticipant(@PathVariable Integer ride_id ,@PathVariable Integer user_id ,@RequestBody @Valid RidePerticipant ridePerticipant){
+        ridePerticipantService.addRidePerticipant(ride_id,user_id,ridePerticipant);
 
         return ResponseEntity.status(200).body("ride participant added successfully");
     }

@@ -28,20 +28,22 @@ public class RideRequestService {
         return rideRequests;
     }
 
-    public void addRideRequest(RideRequest rideRequest){
+    public void addRideRequest(Integer user_id,Integer ride_id,RideRequest rideRequest){
 
-        Ride ride = rideRepository.findRideById(rideRequest.getRide().getId());
+        Ride ride = rideRepository.findRideById(ride_id);
 
         if(ride==null){
             throw new ApiException("ride id not found");
         }
 
-        User user = userRepository.findUserById(rideRequest.getPassenger().getId());
+        User user = userRepository.findUserById(user_id);
 
         if(user==null){
             throw new ApiException("passenger id not found");
         }
 
+        rideRequest.setRide(ride);
+        rideRequest.setPassenger(user);
         rideRequest.setStatus("pending");
         rideRequestRepository.save(rideRequest);
     }
@@ -65,8 +67,6 @@ public class RideRequestService {
             throw new ApiException("passenger id not found");
         }
 
-        oldRideRequest.setRide(rideRequest.getRide());
-        oldRideRequest.setPassenger(rideRequest.getPassenger());
         oldRideRequest.setStatus(rideRequest.getStatus());
 
         rideRequestRepository.save(oldRideRequest);
