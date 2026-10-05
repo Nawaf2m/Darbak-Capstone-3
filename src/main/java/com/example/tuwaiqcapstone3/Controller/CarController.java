@@ -5,8 +5,11 @@ import com.example.tuwaiqcapstone3.Model.Car;
 import com.example.tuwaiqcapstone3.Service.CarService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/v1/car")
@@ -36,5 +39,10 @@ public class CarController {
     public ResponseEntity<?> deleteCar(@PathVariable Integer id) {
         carService.deleteCar(id);
         return ResponseEntity.status(200).body(new ApiResponse("car deleted successfully"));
+    }
+
+    @GetMapping("/availability-conflict/{carId}")
+    public ResponseEntity<?> checkAvailabilityConflict(@PathVariable Integer carId, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") LocalDateTime departure, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") LocalDateTime expectedArrival) {
+        return ResponseEntity.status(200).body(carService.checkAvailabilityConflict(carId, departure, expectedArrival));
     }
 }

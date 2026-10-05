@@ -17,48 +17,48 @@ public class RidePerticipantController {
     private final RidePerticipantService ridePerticipantService;
 
     @GetMapping("/get")
-    public ResponseEntity<?> getRidePerticipants(){
+    public ResponseEntity<?> getRidePerticipants() {
         return ResponseEntity.status(200).body(ridePerticipantService.getRidePerticipants());
     }
 
     @PostMapping("/add/{ride_id}/{user_id}")
-    public ResponseEntity<?> addRidePerticipant(@PathVariable Integer ride_id ,@PathVariable Integer user_id ,@RequestBody @Valid RidePerticipant ridePerticipant){
-        ridePerticipantService.addRidePerticipant(ride_id,user_id,ridePerticipant);
-
+    public ResponseEntity<?> addRidePerticipant(@PathVariable Integer ride_id, @PathVariable Integer user_id, @RequestBody @Valid RidePerticipant ridePerticipant) {
+        ridePerticipantService.addRidePerticipant(ride_id, user_id, ridePerticipant);
         return ResponseEntity.status(200).body("ride participant added successfully");
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> updateRidePerticipant(@PathVariable Integer id, @RequestBody @Valid RidePerticipant ridePerticipant){
-        ridePerticipantService.updateRidePerticipant(id,ridePerticipant);
-
+    public ResponseEntity<?> updateRidePerticipant(@PathVariable Integer id, @RequestBody @Valid RidePerticipant ridePerticipant) {
+        ridePerticipantService.updateRidePerticipant(id, ridePerticipant);
         return ResponseEntity.status(200).body("ride participant updated successfully");
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteRidePerticipant(@PathVariable Integer id){
+    public ResponseEntity<?> deleteRidePerticipant(@PathVariable Integer id) {
         ridePerticipantService.deleteRidePerticipant(id);
-
         return ResponseEntity.status(200).body("ride participant deleted successfully");
     }
-    @GetMapping("/user/{user_id}/ride/{ride_id}")
-    public ResponseEntity<?> getSpecificRidePerticipant(@PathVariable Integer user_id,@PathVariable Integer ride_id){
-        RidePerticipant ridePerticipant = ridePerticipantService.getSpecificRidePerticipant(user_id,ride_id);
 
+    @GetMapping("/user/{user_id}/ride/{ride_id}")
+    public ResponseEntity<?> getSpecificRidePerticipant(@PathVariable Integer user_id, @PathVariable Integer ride_id) {
+        RidePerticipant ridePerticipant = ridePerticipantService.getSpecificRidePerticipant(user_id, ride_id);
         return ResponseEntity.status(200).body(ridePerticipant);
     }
 
     @GetMapping("/ride/{ride_id}")
-    public ResponseEntity<?> GetAllParticipantsInARide(@PathVariable Integer ride_id){
+    public ResponseEntity<?> GetAllParticipantsInARide(@PathVariable Integer ride_id) {
         List<RidePerticipant> ridePerticipants = ridePerticipantService.GetAllParticipantsInARide(ride_id);
-
         return ResponseEntity.status(200).body(ridePerticipants);
     }
 
     @GetMapping("/ride/{ride_id}/role/{role}")
-    public ResponseEntity<?> GetParticipantsByRoleInARideInteger(@PathVariable Integer ride_id,@PathVariable String role){
-        List<RidePerticipant> ridePerticipants = ridePerticipantService.GetParticipantsByRoleInARideInteger(ride_id,role);
-
+    public ResponseEntity<?> GetParticipantsByRoleInARideInteger(@PathVariable Integer ride_id, @PathVariable String role) {
+        List<RidePerticipant> ridePerticipants = ridePerticipantService.GetParticipantsByRoleInARideInteger(ride_id, role);
         return ResponseEntity.status(200).body(ridePerticipants);
+    }
+
+    @GetMapping("/passenger-count/{rideId}")
+    public ResponseEntity<?> getPassengerCount(@PathVariable Integer rideId) {
+        return ResponseEntity.status(200).body(ridePerticipantService.getPassengerCount(rideId));
     }
 }

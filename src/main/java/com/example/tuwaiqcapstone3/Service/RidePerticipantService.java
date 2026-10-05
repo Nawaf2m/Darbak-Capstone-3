@@ -20,26 +20,26 @@ public class RidePerticipantService {
     private final RideRepository rideRepository;
     private final UserRepository userRepository;
 
-    public List<RidePerticipant> getRidePerticipants(){
+    public List<RidePerticipant> getRidePerticipants() {
         List<RidePerticipant> ridePerticipants = ridePerticipantRepository.findAll();
 
-        if(ridePerticipants.isEmpty()){
+        if (ridePerticipants.isEmpty()) {
             throw new ApiException("there is no ride participants");
         }
+
         return ridePerticipants;
     }
 
-    public void addRidePerticipant(Integer ride_id ,Integer user_id ,RidePerticipant ridePerticipant){
-
+    public void addRidePerticipant(Integer ride_id, Integer user_id, RidePerticipant ridePerticipant) {
         Ride ride = rideRepository.findRideById(ride_id);
 
-        if(ride==null){
+        if (ride == null) {
             throw new ApiException("ride id not found");
         }
 
         User user = userRepository.findUserById(user_id);
 
-        if(user==null){
+        if (user == null) {
             throw new ApiException("user id not found");
         }
 
@@ -48,22 +48,22 @@ public class RidePerticipantService {
         ridePerticipantRepository.save(ridePerticipant);
     }
 
-    public void updateRidePerticipant(Integer id, RidePerticipant ridePerticipant){
+    public void updateRidePerticipant(Integer id, RidePerticipant ridePerticipant) {
         RidePerticipant oldRidePerticipant = ridePerticipantRepository.findRidePerticipantById(id);
 
-        if(oldRidePerticipant==null){
+        if (oldRidePerticipant == null) {
             throw new ApiException("ride participant id not found");
         }
 
         Ride ride = rideRepository.findRideById(ridePerticipant.getRide().getId());
 
-        if(ride==null){
+        if (ride == null) {
             throw new ApiException("ride id not found");
         }
 
         User user = userRepository.findUserById(ridePerticipant.getUser().getId());
 
-        if(user==null){
+        if (user == null) {
             throw new ApiException("user id not found");
         }
 
@@ -73,61 +73,77 @@ public class RidePerticipantService {
         ridePerticipantRepository.save(oldRidePerticipant);
     }
 
-    public void deleteRidePerticipant(Integer id){
+    public void deleteRidePerticipant(Integer id) {
         RidePerticipant ridePerticipant = ridePerticipantRepository.findRidePerticipantById(id);
 
-        if(ridePerticipant==null){
+        if (ridePerticipant == null) {
             throw new ApiException("ride participant id not found");
         }
 
         ridePerticipantRepository.delete(ridePerticipant);
     }
 
-    public RidePerticipant getSpecificRidePerticipant(Integer user_id,Integer ride_id){
+    public RidePerticipant getSpecificRidePerticipant(Integer user_id, Integer ride_id) {
         User user = userRepository.findUserById(user_id);
-        if(user==null){
+
+        if (user == null) {
             throw new ApiException("user not found");
         }
 
         Ride ride = rideRepository.findRideById(ride_id);
-        if(ride==null){
+
+        if (ride == null) {
             throw new ApiException("ride not found");
         }
 
+        RidePerticipant ridePerticipant = ridePerticipantRepository.findRidePerticipantByUserAndRide(user, ride);
 
-        RidePerticipant ridePerticipant = ridePerticipantRepository.findRidePerticipantByUserAndRide(user,ride);
-        if(ridePerticipant==null){
+        if (ridePerticipant == null) {
             throw new ApiException("ride participant not found");
         }
+
         return ridePerticipant;
     }
 
-
-    public List<RidePerticipant>  GetAllParticipantsInARide(Integer ride_id){
+    public List<RidePerticipant> GetAllParticipantsInARide(Integer ride_id) {
         Ride ride = rideRepository.findRideById(ride_id);
-        if(ride==null){
+
+        if (ride == null) {
             throw new ApiException("ride not found");
         }
 
-        List<RidePerticipant> ridePerticipants= ridePerticipantRepository.findRidePerticipantByRide(ride);
+        List<RidePerticipant> ridePerticipants = ridePerticipantRepository.findRidePerticipantByRide(ride);
 
-        if(ridePerticipants.isEmpty()){
+        if (ridePerticipants.isEmpty()) {
             throw new ApiException("ride dont have participant");
         }
+
         return ridePerticipants;
     }
 
-    public List<RidePerticipant>  GetParticipantsByRoleInARideInteger (Integer ride_id,String role){
+    public List<RidePerticipant> GetParticipantsByRoleInARideInteger(Integer ride_id, String role) {
         Ride ride = rideRepository.findRideById(ride_id);
-        if(ride==null){
+
+        if (ride == null) {
             throw new ApiException("ride not found");
         }
 
-        List<RidePerticipant> ridePerticipants= ridePerticipantRepository.findRidePerticipantByRideAndRole(ride,role);
+        List<RidePerticipant> ridePerticipants = ridePerticipantRepository.findRidePerticipantByRideAndRole(ride, role);
 
-        if(ridePerticipants.isEmpty()){
+        if (ridePerticipants.isEmpty()) {
             throw new ApiException("there is no participant with this role");
         }
+
         return ridePerticipants;
+    }
+
+    public Long getPassengerCount(Integer rideId) {
+        Ride ride = rideRepository.findRideById(rideId);
+
+        if (ride == null) {
+            throw new ApiException("ride not found");
+        }
+
+        return ridePerticipantRepository.countPassengersByRideId(rideId);
     }
 }

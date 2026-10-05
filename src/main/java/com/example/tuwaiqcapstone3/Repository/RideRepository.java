@@ -7,44 +7,42 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Repository
-public interface RideRepository extends JpaRepository<Ride,Integer> {
+public interface RideRepository extends JpaRepository<Ride, Integer> {
+
     Ride findRideById(Integer id);
+
     Integer countByDriverId(Integer driverId);
 
     Integer countByDriverIdAndStatus(Integer driverId, String status);
 
-    @Query("""
-    SELECT DISTINCT r
-    FROM Ride r
-    LEFT JOIN r.ridePerticipants p
-    WHERE (r.driver.id = :userId OR p.user.id = :userId)
-    AND r.departureDate >= :today
-    AND r.status IN ('available', 'full')
-    ORDER BY r.departureDate, r.departureTime
-    """)
-    List<Ride> findUpcomingRidesByUserId(Integer userId,LocalDate today);
+    @Query("select distinct r from Ride r left join r.ridePerticipants p where (r.driver.id = ?1 or p.user.id = ?1) and r.departureDate >= ?2 and r.status in ('available', 'full') order by r.departureDate, r.departureTime")
+    List<Ride> findUpcomingRidesByUserId(Integer userId, LocalDate today);
 
-
-    @Query("""
-    SELECT COUNT(DISTINCT r.match.id)
-    FROM Ride r
-    LEFT JOIN r.ridePerticipants p
-    WHERE r.driver.id = :userId
-       OR p.user.id = :userId
-    """)
+    @Query("select count(distinct r.match.id) from Ride r left join r.ridePerticipants p where r.driver.id = ?1 or p.user.id = ?1")
     Integer countMatchesByUserId(Integer userId);
 
+    @Query("select count(distinct r.match.id) from Ride r left join r.ridePerticipants p where (r.driver.id = ?1 or p.user.id = ?1) and r.match.startTime > ?2")
+    Integer countUpcomingMatchesByUserId(Integer userId, LocalDateTime now);
 
-    @Query("""
-    SELECT COUNT(DISTINCT r.match.id)
-    FROM Ride r
-    LEFT JOIN r.ridePerticipants p
-    WHERE (r.driver.id = :userId OR p.user.id = :userId)
-    AND r.match.startTime > :now
-    """)
-    Integer countUpcomingMatchesByUserId(Integer userId,LocalDateTime now);
-    //long if error
+    @Query("select r from Ride r where r.match.id = ?1 and r.departureDate = ?2 and r.status = 'available' and r.availableSeats >= ?3")
+    List<Ride> findSuitableRides(Integer matchId, LocalDate date, Integer seats);
+
+    @Query("select r from Ride r where r.status = 'available' and r.availableSeats > 0 and (r.departureDate > ?1 or (r.departureDate = ?1 and r.departureTime > ?2)) order by r.departureDate, r.departureTime")
+    List<Ride> findAvailableRides(LocalDate date, LocalTime time);
+
+    @Query("select r from Ride r where r.match.id = ?1 order by r.departureDate, r.departureTime")
+    List<Ride> findRidesByMatchId(Integer matchId);
+
+    @Query("select r from Ride r where r.driver.id = ?1 order by r.departureDate, r.departureTime")
+    List<Ride> findRidesByDriverId(Integer driverId);
+
+    @Query("select r from Ride r where r.car.id = ?1 and r.status in ('available', 'full')")
+    List<Ride> findActiveRidesByCarId(Integer carId);
+
+    @Query("select r from Ride r where r.driver.id = ?1 and r.status in ('available', 'full')")
+    List<Ride> findActiveRidesByDriverId(Integer driverId);
 }

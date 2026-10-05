@@ -10,7 +10,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface RidePerticipantRepository extends JpaRepository<RidePerticipant,Integer> {
+public interface RidePerticipantRepository extends JpaRepository<RidePerticipant, Integer> {
+
     RidePerticipant findRidePerticipantById(Integer id);
 
     boolean existsByRideIdAndUserId(Integer rideId, Integer userId);
@@ -21,14 +22,12 @@ public interface RidePerticipantRepository extends JpaRepository<RidePerticipant
 
     List<RidePerticipant> findRidePerticipantByRideAndRole(Ride ride, String role);
 
-    // rides the user joined as a passenger (excluding rides where he is the driver)
-    @Query("select count(p) from RidePerticipant p " +
-            "where p.user.id = :userId and p.ride.driver.id <> :userId")
+    @Query("select count(p) from RidePerticipant p where p.user.id = ?1 and p.ride.driver.id <> ?1")
     Integer countRidesAsPassenger(Integer userId);
 
-    @Query("select count(p) from RidePerticipant p " +
-            "where p.user.id = :userId and p.ride.driver.id <> :userId " +
-            "and p.ride.status = :status")
+    @Query("select count(p) from RidePerticipant p where p.user.id = ?1 and p.ride.driver.id <> ?1 and p.ride.status = ?2")
     Integer countRidesAsPassengerByStatus(Integer userId, String status);
-//long if error
+
+    @Query("select count(p) from RidePerticipant p where p.ride.id = ?1 and p.role = 'passenger'")
+    Long countPassengersByRideId(Integer rideId);
 }

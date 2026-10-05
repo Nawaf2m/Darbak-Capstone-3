@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Set;
 
@@ -68,14 +69,16 @@ public class Ride {
 
     @Column(nullable = false)
     @NotNull(message = "available seats can not be null")
-    @Min(value = 1, message = "available seats must be at least 1")
+    @Min(value = 0, message = "available seats can not be negative")
     private Integer availableSeats;
 
     @Pattern(regexp = "available|full|completed|cancelled", message = "status must be either available or full or completed or cancelled")
-    @NotEmpty(message = "status can not be empty")
     @Size(min = 3, max = 30, message = "status length must be between 3 and 30")
     @Column(columnDefinition = "varchar(30)",nullable = false)
     private String status;
+
+    @NotNull(message = "expected arrival time can not be null")
+    private LocalDateTime expectedArrivalTime;
 
     @NotEmpty(message = "notes can not be empty")
     @Size(min = 3, max = 500, message = "notes length must be between 3 and 500")
