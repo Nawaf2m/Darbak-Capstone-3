@@ -1,6 +1,6 @@
 package com.example.tuwaiqcapstone3.Service;
 
-import com.example.tuwaiqcapstone3.api.ApiException;
+import com.example.tuwaiqcapstone3.API.ApiException;
 import com.example.tuwaiqcapstone3.Model.Ride;
 import com.example.tuwaiqcapstone3.Model.RideRequest;
 import com.example.tuwaiqcapstone3.Model.User;
@@ -21,7 +21,11 @@ public class RideRequestService {
     private final UserRepository userRepository;
 
     public List<RideRequest> getRideRequests(){
-        return rideRequestRepository.findAll();
+        List<RideRequest> rideRequests = rideRequestRepository.findAll();
+        if(rideRequests.isEmpty()){
+            throw new ApiException("there is no requests in the system");
+        }
+        return rideRequests;
     }
 
     public void addRideRequest(RideRequest rideRequest){

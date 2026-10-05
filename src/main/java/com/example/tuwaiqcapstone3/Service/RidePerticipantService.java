@@ -21,7 +21,12 @@ public class RidePerticipantService {
     private final UserRepository userRepository;
 
     public List<RidePerticipant> getRidePerticipants(){
-        return ridePerticipantRepository.findAll();
+        List<RidePerticipant> ridePerticipants = ridePerticipantRepository.findAll();
+
+        if(ridePerticipants.isEmpty()){
+            throw new ApiException("there is no ride participants");
+        }
+        return ridePerticipants;
     }
 
     public void addRidePerticipant(RidePerticipant ridePerticipant){

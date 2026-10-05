@@ -2,8 +2,11 @@ package com.example.tuwaiqcapstone3.Service;
 
 import com.example.tuwaiqcapstone3.API.ApiException;
 import com.example.tuwaiqcapstone3.Model.Car;
+import com.example.tuwaiqcapstone3.Model.Match;
 import com.example.tuwaiqcapstone3.Model.Ride;
+import com.example.tuwaiqcapstone3.Model.User;
 import com.example.tuwaiqcapstone3.Repository.CarRepository;
+import com.example.tuwaiqcapstone3.Repository.MatchRepository;
 import com.example.tuwaiqcapstone3.Repository.RideRepository;
 import com.example.tuwaiqcapstone3.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +24,12 @@ public class RideService {
     private final CarRepository carRepository;
 
     public List<Ride> getRides(){
-        return rideRepository.findAll();
+        List<Ride> rides = rideRepository.findAll();
+
+        if(rides.isEmpty()){
+            throw new ApiException("there is no rides in the system");
+        }
+        return rides;
     }
 
     public void addRide(Ride ride){
