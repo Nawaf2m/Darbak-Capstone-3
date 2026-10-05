@@ -1,5 +1,6 @@
 package com.example.tuwaiqcapstone3.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -11,6 +12,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Setter
 @Getter
@@ -23,6 +26,10 @@ public class Match {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @ManyToMany(mappedBy = "matches")
+    @JsonIgnore
+    private Set<User> users = new HashSet<>();
 
     @NotNull(message = "Stadium is required")
     @ManyToOne(optional = false)
