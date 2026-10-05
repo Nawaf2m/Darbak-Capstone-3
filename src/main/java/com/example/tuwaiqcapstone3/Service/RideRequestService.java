@@ -2,8 +2,10 @@ package com.example.tuwaiqcapstone3.Service;
 
 import com.example.tuwaiqcapstone3.API.ApiException;
 import com.example.tuwaiqcapstone3.Model.Ride;
+import com.example.tuwaiqcapstone3.Model.RidePerticipant;
 import com.example.tuwaiqcapstone3.Model.RideRequest;
 import com.example.tuwaiqcapstone3.Model.User;
+import com.example.tuwaiqcapstone3.Repository.RidePerticipantRepository;
 import com.example.tuwaiqcapstone3.Repository.RideRepository;
 import com.example.tuwaiqcapstone3.Repository.RideRequestRepository;
 import com.example.tuwaiqcapstone3.Repository.UserRepository;
@@ -19,6 +21,7 @@ public class RideRequestService {
     private final RideRequestRepository rideRequestRepository;
     private final RideRepository rideRepository;
     private final UserRepository userRepository;
+    private final RidePerticipantRepository ridePerticipantRepository;
 
     public List<RideRequest> getRideRequests(){
         List<RideRequest> rideRequests = rideRequestRepository.findAll();
@@ -80,5 +83,143 @@ public class RideRequestService {
         }
 
         rideRequestRepository.delete(rideRequest);
+    }
+
+    public List<RideRequest> ViewRequestsForARide(Integer ride_id){
+        Ride ride = rideRepository.findRideById(ride_id);
+
+        if(ride==null){
+            throw new ApiException("ride id not found");
+        }
+        List<RideRequest> rideRequests = rideRequestRepository.findRideRequestByRide(ride);
+
+        if(rideRequests.isEmpty()){
+            throw new ApiException("there is no requests for this ride");
+        }
+        return rideRequests;
+    }
+
+    public List<RideRequest> ViewRequestsForAUser(Integer user_id){
+        User user = userRepository.findUserById(user_id);
+
+        if(user==null){
+            throw new ApiException("user id not found");
+        }
+        List<RideRequest> rideRequests = rideRequestRepository.findRideRequestByPassenger(user);
+
+        if(rideRequests.isEmpty()){
+            throw new ApiException("there is no requests for this user");
+        }
+        return rideRequests;
+    }
+
+
+    public void AcceptRequest(Integer request_id,Integer driver_id){
+        RideRequest rideRequest = rideRequestRepository.findRideRequestById(request_id);
+
+        if(rideRequest==null){
+            throw new ApiException("request not found");
+        }
+
+        if(!rideRequest.getStatus().equalsIgnoreCase("pending")){
+            throw new ApiException("the request is not pending");
+        }
+
+        User user = userRepository.findUserById(driver_id);
+        if(user==null){
+            throw new ApiException("driver not found");
+        }
+
+        Ride ride = rideRepository.findRideById(rideRequest.getRide().getId());
+        if(ride == null){
+            throw new ApiException("ride not found ");
+        }
+
+        if(!ride.getDriver().getId().equals(driver_id)){
+            throw new ApiException("driver dont own the ride");
+        }
+
+
+        rideRequest.setStatus("accepted");
+        rideRequestRepository.save(rideRequest);
+
+        RidePerticipant ridePerticipant = new RidePerticipant();
+
+        ridePerticipant.setUser(rideRequest.getPassenger());
+        ridePerticipant.setRide(rideRequest.getRide());
+        ridePerticipant.setRole("passenger");
+        ridePerticipantRepository.save(ridePerticipant);
+
+        rideRequest.getRide().getRidePerticipants().add(ridePerticipant);
+        rideRepository.save(rideRequest.getRide());
+    }
+
+
+    public void RejectRequest(Integer request_id,Integer driver_id){
+        RideRequest rideRequest = rideRequestRepository.findRideRequestById(request_id);
+
+        if(rideRequest==null){
+            throw new ApiException("request not found");
+        }
+
+        if(!rideRequest.getStatus().equalsIgnoreCase("pending")){
+            throw new ApiException("the request is not pending");
+        }
+
+        User user = userRepository.findUserById(driver_id);
+        if(user==null){
+            throw new ApiException("driver not found");
+        }
+
+        Ride ride = rideRepository.findRideById(rideRequest.getRide().getId());
+        if(ride == null){
+            throw new ApiException("ride not found ");
+        }
+
+        if(!ride.getDriver().getId().equals(driver_id)){
+            throw new ApiException("driver dont own the ride");
+        }
+
+        rideRequest.setStatus("rejected");
+        rideRequestRepository.save(rideRequest);
+    }
+
+    public void CancelRequest(Integer request_id,Integer passenger_id){
+        RideRequest rideRequest = rideRequestRepository.findRideRequestById(request_id);
+
+        if(rideRequest==null){
+            throw new ApiException("request not found");
+        }
+
+        if(!rideRequest.getStatus().equalsIgnoreCase("pending")){
+            throw new ApiException("the request is not pending");
+        }
+
+        User user = userRepository.findUserById(passenger_id);
+        if(user==null){
+            throw new ApiException("passenger not found");
+        }
+
+        if(!rideRequest.getPassenger().getId().equals(passenger_id)){
+            throw new ApiException("passenger dont own the request");
+        }
+
+        rideRequestRepository.delete(rideRequest);
+    }
+
+    public List<RideRequest> getUserPendingRequest(Integer user_id){
+        User user = userRepository.findUserById(user_id);
+        if(user==null){
+            throw new ApiException("user not found");
+        }
+
+        List<RideRequest> rideRequests = rideRequestRepository.findRideRequestByPassengerAndStatus(user,"pending");
+
+        if(rideRequests.isEmpty()){
+            throw new ApiException("you dont have requests");
+        }
+
+        return rideRequests;
+
     }
 }

@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
 
@@ -38,7 +39,7 @@ public class RidePerticipant {
     @Size(min = 3, max = 10, message = "role length must be between 3 and 10")
     private String role;
 
-    @Column(nullable = false)
-    @NotNull(message = "joined at can not be null")
+    @CreationTimestamp
+    @Column(nullable = false,updatable = false)
     private LocalDate joinedAt;
 }
