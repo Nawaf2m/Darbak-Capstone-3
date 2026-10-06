@@ -26,6 +26,8 @@ public class UserService {
     private final ReviewRepository reviewRepository;
     private final RideRepository rideRepository;
     private final RidePerticipantRepository ridePerticipantRepository;
+    private final EmailService emailService;
+    private final PdfService pdfService;
 
 
 
@@ -54,6 +56,9 @@ public class UserService {
         user.setCreatedAt(LocalDateTime.now());
         user.setBanned(false);
         userRepository.save(user);
+        emailService.sendHtmlEmail(user.getEmail(), "Welcome to Darbak | مرحبًا بك في دربك",
+                EmailTemplates.welcome(user.getName()));
+
     }
 
     public void login(String email, String password) {
@@ -231,6 +236,25 @@ public class UserService {
     public List<Ride> getUserUpcomingRides(Integer userId) {
         getUserById(userId);
         return rideRepository.findUpcomingRidesByUserId(userId, LocalDate.now());
+    }
+
+    // 11. Send the user's match plan (upcoming rides) by email as a PDF (lang = "ar" or "en")
+    public void sendPlanByEmail(Integer userId, String lang) {
+        User user = getUserById(userId);
+        List<Ride> rides = rideRepository.findUpcomingRidesByUserId(userId, LocalDate.now());
+        if (rides.isEmpty()) {
+            throw new ApiException("You have no upcoming plans to send");
+        }
+
+        boolean ar = "ar".equalsIgnoreCase(lang);
+        byte[] pdf = pdfService.createPlanPdf(user, rides, lang);
+
+        String subject = ar ? "خطة مبارياتك" : "Your match plan";
+        String text = ar
+                ? "مرحبًا " + user.getName() + "، خطة مبارياتك مرفقة بصيغة PDF."
+                : "Hi " + user.getName() + ", your match plan is attached as a PDF.";
+
+        emailService.sendEmailWithPdf(user.getEmail(), subject, text, pdf, "match-plan.pdf");
     }
 
 }
