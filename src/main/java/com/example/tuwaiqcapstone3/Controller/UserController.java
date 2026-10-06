@@ -2,6 +2,7 @@ package com.example.tuwaiqcapstone3.Controller;
 
 import com.example.tuwaiqcapstone3.API.ApiResponse;
 import com.example.tuwaiqcapstone3.Model.User;
+import com.example.tuwaiqcapstone3.Service.AiService;
 import com.example.tuwaiqcapstone3.Service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private final AiService aiService;
 
     @GetMapping("/get")
     public ResponseEntity<?> getAllUsers() {
@@ -113,5 +115,10 @@ public class UserController {
     @GetMapping("/upcoming-rides/{userId}")
     public ResponseEntity<?> getUserUpcomingRides(@PathVariable Integer userId) {
         return ResponseEntity.status(200).body(userService.getUserUpcomingRides(userId));
+    }
+
+    @GetMapping("/review-summary/{userId}")
+    public ResponseEntity<?> summarizeUserReviews(@PathVariable Integer userId) {
+        return ResponseEntity.status(200).body(aiService.summarizeUserReviews(userId));
     }
 }
