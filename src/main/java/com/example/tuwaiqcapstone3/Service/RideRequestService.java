@@ -22,6 +22,7 @@ public class RideRequestService {
     private final RideRepository rideRepository;
     private final UserRepository userRepository;
     private final RidePerticipantRepository ridePerticipantRepository;
+    private final WhatsAppService whatsAppService;
 
     public List<RideRequest> getRideRequests(){
         List<RideRequest> rideRequests = rideRequestRepository.findAll();
@@ -45,10 +46,15 @@ public class RideRequestService {
             throw new ApiException("passenger id not found");
         }
 
+        if(ride.getAvailableSeats()<=0){
+            throw new ApiException("the ride is full ");
+        }
+
         rideRequest.setRide(ride);
         rideRequest.setPassenger(user);
         rideRequest.setStatus("pending");
         rideRequestRepository.save(rideRequest);
+        whatsAppService.notifyDriverNewRequest(ride, user);
     }
 
     public void updateRideRequest(Integer id, RideRequest rideRequest){
@@ -139,6 +145,10 @@ public class RideRequestService {
             throw new ApiException("driver dont own the ride");
         }
 
+        if(ride.getAvailableSeats()<=0){
+            throw new ApiException("the ride is full ");
+        }
+
 
         rideRequest.setStatus("accepted");
         rideRequestRepository.save(rideRequest);
@@ -150,8 +160,10 @@ public class RideRequestService {
         ridePerticipant.setRole("passenger");
         ridePerticipantRepository.save(ridePerticipant);
 
-        rideRequest.getRide().getRidePerticipants().add(ridePerticipant);
+        ride.getRidePerticipants().add(ridePerticipant);
+        ride.setAvailableSeats(ride.getAvailableSeats()-1);
         rideRepository.save(rideRequest.getRide());
+        whatsAppService.notifyPassengerRequestAccepted(ride, rideRequest.getPassenger());
     }
 
 
@@ -182,6 +194,7 @@ public class RideRequestService {
 
         rideRequest.setStatus("rejected");
         rideRequestRepository.save(rideRequest);
+        whatsAppService.notifyPassengerRequestRejected(ride, rideRequest.getPassenger());
     }
 
     public void CancelRequest(Integer request_id,Integer passenger_id){

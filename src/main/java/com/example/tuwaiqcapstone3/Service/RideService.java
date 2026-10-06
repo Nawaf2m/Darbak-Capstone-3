@@ -24,6 +24,7 @@ public class RideService {
     private final CarRepository carRepository;
     private final CarService carService;
     private final RidePerticipantRepository ridePerticipantRepository;
+    private final WhatsAppService whatsAppService;
 
     public List<Ride> getRides() {
         List<Ride> rides = rideRepository.findAll();
@@ -303,6 +304,7 @@ public class RideService {
 
         ride.setStatus("completed");
         rideRepository.save(ride);
+        whatsAppService.notifyRideStatusChanged(ride);
     }
 
     public void cancelRide(Integer rideId, Integer driverId) {
@@ -332,6 +334,7 @@ public class RideService {
 
         ride.setStatus("cancelled");
         rideRepository.save(ride);
+        whatsAppService.notifyRideStatusChanged(ride);
     }
 
     private boolean checkDriverAvailabilityConflict(Integer driverId, LocalDateTime departure, LocalDateTime expectedArrival, Integer excludedRideId) {
