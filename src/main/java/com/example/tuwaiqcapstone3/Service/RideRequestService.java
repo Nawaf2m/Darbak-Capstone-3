@@ -22,6 +22,7 @@ public class RideRequestService {
     private final RideRepository rideRepository;
     private final UserRepository userRepository;
     private final RidePerticipantRepository ridePerticipantRepository;
+    private final WhatsAppService whatsAppService;
 
     public List<RideRequest> getRideRequests(){
         List<RideRequest> rideRequests = rideRequestRepository.findAll();
@@ -53,6 +54,7 @@ public class RideRequestService {
         rideRequest.setPassenger(user);
         rideRequest.setStatus("pending");
         rideRequestRepository.save(rideRequest);
+        whatsAppService.notifyDriverNewRequest(ride, user);
     }
 
     public void updateRideRequest(Integer id, RideRequest rideRequest){
@@ -161,6 +163,7 @@ public class RideRequestService {
         ride.getRidePerticipants().add(ridePerticipant);
         ride.setAvailableSeats(ride.getAvailableSeats()-1);
         rideRepository.save(rideRequest.getRide());
+        whatsAppService.notifyPassengerRequestAccepted(ride, rideRequest.getPassenger());
     }
 
 
@@ -191,6 +194,7 @@ public class RideRequestService {
 
         rideRequest.setStatus("rejected");
         rideRequestRepository.save(rideRequest);
+        whatsAppService.notifyPassengerRequestRejected(ride, rideRequest.getPassenger());
     }
 
     public void CancelRequest(Integer request_id,Integer passenger_id){
