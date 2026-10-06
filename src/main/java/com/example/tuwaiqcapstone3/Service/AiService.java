@@ -27,48 +27,73 @@ public class AiService {
     public AiReviewCheckDTO checkInappropriateReview(String comment){
 
         String prompt = """
-            You are a content moderation assistant for a ride-sharing platform.
+        You are a content moderation assistant for a ride-sharing platform.
 
-            Analyze the following passenger review comment and determine whether it is inappropriate.
+        Analyze the following passenger review comment and determine whether it is inappropriate.
 
-            A comment is inappropriate if it contains:
-            - Profanity or offensive language
-            - Insults or personal attacks
-            - Threats or violent language
-            - Hate speech or discrimination
-            - Harassment or bullying
-            - Sexual or explicit content
-            - Spam or irrelevant promotional content
-            - Personal or sensitive information
+        The comment can be written in Arabic or English.
 
-            A negative review is NOT automatically inappropriate.
-            Users are allowed to honestly complain about:
-            - Late arrival
-            - Bad driving
-            - Unclean car
-            - Poor communication
-            - Long waiting time
-            - Other negative ride experiences
+        IMPORTANT LANGUAGE RULE:
+        - Detect the language of the review comment automatically.
+        - If the review is in English, write the reason in English.
+        - If the review is in Arabic, write the reason in Arabic.
+        - If the review contains both Arabic and English, use the language that is used most in the comment.
 
-            Return ONLY valid JSON in exactly this format:
+        A comment is inappropriate if it contains:
+        - Profanity or offensive language
+        - Insults or personal attacks
+        - Threats or violent language
+        - Hate speech or discrimination
+        - Harassment or bullying
+        - Sexual or explicit content
+        - Spam or irrelevant promotional content
+        - Personal or sensitive information
 
-            {
-              "inappropriate": true,
-              "reason": "Offensive language"
-            }
+        A negative review is NOT automatically inappropriate.
 
-            If the comment is appropriate, return:
+        Users are allowed to honestly complain about:
+        - Late arrival
+        - Bad driving
+        - Unclean car
+        - Poor communication
+        - Long waiting time
+        - Other negative ride experiences
 
-            {
-              "inappropriate": false,
-              "reason": "The comment is appropriate"
-            }
+        Return ONLY valid JSON in exactly this format:
 
-            Review comment:
-            """ + comment;
+        {
+          "inappropriate": true,
+          "reason": "Offensive language"
+        }
+
+        If the comment is appropriate, return:
+
+        {
+          "inappropriate": false,
+          "reason": "The comment is appropriate"
+        }
+
+        For Arabic comments, the reason must also be Arabic.
+
+        Example Arabic inappropriate response:
+
+        {
+          "inappropriate": true,
+          "reason": "إهانة أو إساءة شخصية"
+        }
+
+        Example Arabic appropriate response:
+
+        {
+          "inappropriate": false,
+          "reason": "التعليق مناسب"
+        }
+
+        Review comment:
+        """ + comment;
 
         Map<String, Object> request = Map.of(
-                "model", "google/gemma-4-26b-a4b-it:free",
+                "model", "nvidia/nemotron-3-ultra-550b-a55b:free",
                 "messages", List.of(
                         Map.of(
                                 "role", "user",
