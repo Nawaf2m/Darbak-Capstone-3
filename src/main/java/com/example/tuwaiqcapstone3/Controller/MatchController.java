@@ -24,6 +24,21 @@ public class MatchController {
         return ResponseEntity.status(200).body(matchService.getMatchById(id));
     }
 
+    @GetMapping("/stadium/{stadiumId}")
+    public ResponseEntity<?> getMatchesByStadiumId(@PathVariable Integer stadiumId) {
+        return ResponseEntity.status(200).body(matchService.getMatchesByStadiumId(stadiumId));
+    }
+
+    @GetMapping("/team/{teamName}")
+    public ResponseEntity<?> getMatchesByTeam(@PathVariable String teamName) {
+        return ResponseEntity.status(200).body(matchService.getMatchesByTeam(teamName));
+    }
+
+    @GetMapping("/city/{city}")
+    public ResponseEntity<?> getMatchesByCity(@PathVariable String city) {
+        return ResponseEntity.status(200).body(matchService.getMatchesByCity(city));
+    }
+
     @PostMapping("/add")
     public ResponseEntity<?> addMatch(@RequestBody @Valid Match match) {
         matchService.addMatch(match);

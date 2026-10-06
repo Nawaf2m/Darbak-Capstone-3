@@ -1,6 +1,7 @@
 package com.example.tuwaiqcapstone3.Service;
 
 import com.example.tuwaiqcapstone3.API.ApiException;
+import com.example.tuwaiqcapstone3.DTO.RecommendedRideDTO;
 import com.example.tuwaiqcapstone3.Model.Car;
 import com.example.tuwaiqcapstone3.Model.Match;
 import com.example.tuwaiqcapstone3.Model.Ride;
@@ -12,7 +13,10 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -243,6 +247,60 @@ public class RideService {
         }
 
         return rides;
+    }
+
+    /*
+        Recommend rides for the user saved matches,
+        based on the following rules:
+            - shows rides that still have seats,
+            - leave in the future,
+            - and are expected to arrive before the match begins.
+     */
+    public List<RecommendedRideDTO> getRecommendedRidesForUserMatches(Integer userId) {
+        User user = userRepository.findUserById(userId);
+
+        if (user == null) {
+            throw new ApiException("user not found");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        List<Match> matches = matchRepository.findDistinctMatchesByUsers_Id(userId);
+        Set<Integer> matchIds = new HashSet<>();
+
+        for (Match match : matches) {
+            if ("scheduled".equals(match.getStatus()) && match.getStartTime().isAfter(now)) {
+                matchIds.add(match.getId());
+            }
+        }
+
+        List<Ride> rides = rideRepository.findAvailableRides(now.toLocalDate(), now.toLocalTime());
+        List<RecommendedRideDTO> recommendations = new ArrayList<>();
+
+        for (Ride ride : rides) {
+            Match match = ride.getMatch();
+
+            if (match == null || !matchIds.contains(match.getId())) {
+                continue;
+            }
+
+            if (ride.getDriver().getId().equals(userId)
+                    || !ride.getExpectedArrivalTime().isBefore(match.getStartTime())
+                    || ridePerticipantRepository.existsByRideIdAndUserId(ride.getId(), userId)) {
+                continue;
+            }
+
+            recommendations.add(new RecommendedRideDTO(
+                    ride.getId(), match.getId(), match.getHomeTeam(), match.getAwayTeam(),
+                    match.getStartTime(), ride.getDepartureDate(), ride.getDepartureTime(),
+                    ride.getExpectedArrivalTime(), ride.getMeetingPoint(), ride.getMeetingLatitude(),
+                    ride.getMeetingLongitude(), ride.getAvailableSeats()));
+        }
+
+        recommendations.sort(Comparator.comparing(RecommendedRideDTO::getMatchStartTime)
+                .thenComparing(RecommendedRideDTO::getDepartureDate)
+                .thenComparing(RecommendedRideDTO::getDepartureTime));
+
+        return recommendations;
     }
 
     public List<Ride> getRidesByMatchId(Integer matchId) {

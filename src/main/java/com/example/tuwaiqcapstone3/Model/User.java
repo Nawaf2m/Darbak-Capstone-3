@@ -52,6 +52,9 @@ public class User {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    @Column(nullable = false)
+    private boolean banned = false;
+
 
     @OneToMany(mappedBy = "driver")
     @JsonIgnore

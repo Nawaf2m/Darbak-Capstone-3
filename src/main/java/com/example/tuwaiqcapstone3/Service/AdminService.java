@@ -2,7 +2,9 @@ package com.example.tuwaiqcapstone3.Service;
 
 import com.example.tuwaiqcapstone3.API.ApiException;
 import com.example.tuwaiqcapstone3.Model.Admin;
+import com.example.tuwaiqcapstone3.Model.User;
 import com.example.tuwaiqcapstone3.Repository.AdminRepository;
+import com.example.tuwaiqcapstone3.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +15,7 @@ import java.util.List;
 public class AdminService {
 
     private final AdminRepository adminRepository;
+    private final UserRepository userRepository;
 
     public List<Admin> getAllAdmins() {
         return adminRepository.findAll();
@@ -45,6 +48,22 @@ public class AdminService {
         oldAdmin.setPassword(updatedAdmin.getPassword());
         oldAdmin.setPhone(updatedAdmin.getPhone());
         adminRepository.save(oldAdmin);
+    }
+
+    // Marks a user as banned so they cannot log in.
+    public void banUser(Integer userId) {
+        User user = userRepository.findUserById(userId);
+
+        if (user == null) {
+            throw new ApiException("User not found");
+        }
+
+        if (user.isBanned()) {
+            throw new ApiException("User is already banned");
+        }
+
+        user.setBanned(true);
+        userRepository.save(user);
     }
 
     public void deleteAdmin(Integer id) {
