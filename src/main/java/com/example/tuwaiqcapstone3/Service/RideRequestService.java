@@ -45,6 +45,10 @@ public class RideRequestService {
             throw new ApiException("passenger id not found");
         }
 
+        if(ride.getAvailableSeats()<=0){
+            throw new ApiException("the ride is full ");
+        }
+
         rideRequest.setRide(ride);
         rideRequest.setPassenger(user);
         rideRequest.setStatus("pending");
@@ -139,6 +143,10 @@ public class RideRequestService {
             throw new ApiException("driver dont own the ride");
         }
 
+        if(ride.getAvailableSeats()<=0){
+            throw new ApiException("the ride is full ");
+        }
+
 
         rideRequest.setStatus("accepted");
         rideRequestRepository.save(rideRequest);
@@ -150,7 +158,8 @@ public class RideRequestService {
         ridePerticipant.setRole("passenger");
         ridePerticipantRepository.save(ridePerticipant);
 
-        rideRequest.getRide().getRidePerticipants().add(ridePerticipant);
+        ride.getRidePerticipants().add(ridePerticipant);
+        ride.setAvailableSeats(ride.getAvailableSeats()-1);
         rideRepository.save(rideRequest.getRide());
     }
 
