@@ -13,7 +13,10 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -49,6 +52,7 @@ public class UserService {
             throw new ApiException("Phone number is already registered");
         }
         user.setCreatedAt(LocalDateTime.now());
+        user.setBanned(false);
         userRepository.save(user);
     }
 
@@ -56,6 +60,10 @@ public class UserService {
         User user = userRepository.findUserByEmail(email);
         if (user == null || !user.getPassword().equals(password)) {
             throw new ApiException("Invalid email or password");
+        }
+
+        if (user.isBanned()) {
+            throw new ApiException("User is banned");
         }
     }
 
@@ -120,6 +128,27 @@ public class UserService {
     public List<Match> getUserMatches(Integer userId) {
         User user = getUserById(userId);
         return new ArrayList<>(user.getMatches());
+    }
+
+    // Returns upcoming saved matches without an active driver or accepted passenger ride.
+    public List<Match> getMatchesWithoutArrangedRides(Integer userId) {
+        getUserById(userId);
+
+        LocalDateTime now = LocalDateTime.now();
+        List<Match> savedMatches = matchRepository.findDistinctMatchesByUsers_Id(userId);
+        Set<Integer> arrangedMatchIds = new HashSet<>(rideRepository.findArrangedMatchIdsByUserId(userId));
+        List<Match> matchesWithoutRides = new ArrayList<>();
+
+        for (Match match : savedMatches) {
+            if ("scheduled".equals(match.getStatus())
+                    && match.getStartTime().isAfter(now)
+                    && !arrangedMatchIds.contains(match.getId())) {
+                matchesWithoutRides.add(match);
+            }
+        }
+
+        matchesWithoutRides.sort(Comparator.comparing(Match::getStartTime));
+        return matchesWithoutRides;
     }
 
     public void addMatchToUser(Integer userId, Integer matchId) {

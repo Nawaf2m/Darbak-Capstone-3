@@ -51,6 +51,11 @@ public class RideController {
         return ResponseEntity.status(200).body(rideService.getAvailableRides());
     }
 
+    @GetMapping("/recommendations/user/{userId}")
+    public ResponseEntity<?> getRecommendedRidesForUserMatches(@PathVariable Integer userId) {
+        return ResponseEntity.status(200).body(rideService.getRecommendedRidesForUserMatches(userId));
+    }
+
     @GetMapping("/match/{matchId}")
     public ResponseEntity<?> getRidesByMatchId(@PathVariable Integer matchId) {
         return ResponseEntity.status(200).body(rideService.getRidesByMatchId(matchId));

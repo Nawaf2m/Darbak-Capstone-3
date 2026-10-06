@@ -56,6 +56,11 @@ public class UserController {
         return ResponseEntity.status(200).body(userService.getUserMatches(userId));
     }
 
+    @GetMapping("/{userId}/matches/without-rides")
+    public ResponseEntity<?> getMatchesWithoutArrangedRides(@PathVariable Integer userId) {
+        return ResponseEntity.status(200).body(userService.getMatchesWithoutArrangedRides(userId));
+    }
+
     @PostMapping("/{userId}/matches/{matchId}")
     public ResponseEntity<?> addMatchToUser(@PathVariable Integer userId, @PathVariable Integer matchId) {
         userService.addMatchToUser(userId, matchId);

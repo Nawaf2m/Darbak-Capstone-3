@@ -34,6 +34,54 @@ public class MatchService {
         return match;
     }
 
+    // Returns matches scheduled at the given stadium.
+    public List<Match> getMatchesByStadiumId(Integer stadiumId) {
+        Stadium stadium = stadiumRepository.findStadiumById(stadiumId);
+
+        if (stadium == null) {
+            throw new ApiException("stadium not found");
+        }
+
+        List<Match> matches = matchRepository.findMatchesByStadium_Id(stadiumId);
+
+        if (matches.isEmpty()) {
+            throw new ApiException("no matches found for this stadium");
+        }
+
+        return matches;
+    }
+
+    // Returns matches where the team plays at home or away.
+    public List<Match> getMatchesByTeam(String teamName) {
+        if (teamName == null || teamName.isBlank()) {
+            throw new ApiException("team name is required");
+        }
+
+        String team = teamName.trim();
+        List<Match> matches = matchRepository.findMatchesByHomeTeamIgnoreCaseOrAwayTeamIgnoreCase(team, team);
+
+        if (matches.isEmpty()) {
+            throw new ApiException("no matches found for this team");
+        }
+
+        return matches;
+    }
+
+    // Returns matches held at stadiums in the given city.
+    public List<Match> getMatchesByCity(String city) {
+        if (city == null || city.isBlank()) {
+            throw new ApiException("city is required");
+        }
+
+        List<Match> matches = matchRepository.findMatchesByStadium_CityIgnoreCase(city.trim());
+
+        if (matches.isEmpty()) {
+            throw new ApiException("no matches found for this city");
+        }
+
+        return matches;
+    }
+
     public void addMatch(Match match) {
         Stadium stadium = getExistingStadium(match);
         validateMatch(match);

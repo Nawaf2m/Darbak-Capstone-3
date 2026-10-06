@@ -32,6 +32,12 @@ public class AdminController {
         return ResponseEntity.status(200).body(new ApiResponse("Admin updated successfully"));
     }
 
+    @PutMapping("/ban/{userId}")
+    public ResponseEntity<?> banUser(@PathVariable Integer userId) {
+        adminService.banUser(userId);
+        return ResponseEntity.status(200).body(new ApiResponse("User banned successfully"));
+    }
+
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteAdmin(@PathVariable Integer id) {
         adminService.deleteAdmin(id);

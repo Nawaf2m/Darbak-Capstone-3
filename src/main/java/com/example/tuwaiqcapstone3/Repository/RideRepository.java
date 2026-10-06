@@ -28,6 +28,13 @@ public interface RideRepository extends JpaRepository<Ride, Integer> {
     @Query("select count(distinct r.match.id) from Ride r left join r.ridePerticipants p where (r.driver.id = ?1 or p.user.id = ?1) and r.match.startTime > ?2")
     Integer countUpcomingMatchesByUserId(Integer userId, LocalDateTime now);
 
+    @Query("select distinct r.match.id from Ride r left join r.ridePerticipants p where " +
+            "r.status in ('available', 'full') and " +
+            "(r.driver.id = ?1 or (p.user.id = ?1 and p.role = 'passenger') or " +
+            "exists (select rr.id from RideRequest rr where rr.ride = r " +
+            "and rr.passenger.id = ?1 and rr.status = 'accepted'))")
+    List<Integer> findArrangedMatchIdsByUserId(Integer userId);
+
     @Query("select r from Ride r where r.match.id = ?1 and r.departureDate = ?2 and r.status = 'available' and r.availableSeats >= ?3")
     List<Ride> findSuitableRides(Integer matchId, LocalDate date, Integer seats);
 
