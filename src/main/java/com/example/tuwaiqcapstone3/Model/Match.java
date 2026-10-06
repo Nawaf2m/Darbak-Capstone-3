@@ -55,8 +55,22 @@ public class Match {
     private LocalDateTime expectedEndTime;
 
     @NotEmpty(message = "Match status is required")
-    @Pattern(regexp = "scheduled|live|completed|postponed|cancelled",
-            message = "Status must be scheduled, live, completed, postponed, or cancelled")
+    @Pattern(regexp = "scheduled|live|completed|postponed|cancelled", message = "Status must be scheduled, live, completed, postponed, or cancelled")
     @Column(nullable = false, length = 20)
     private String status;
+
+    @Column(unique = true)
+    private Integer externalFixtureId;
+
+    private Integer season;
+
+    @Column(length = 100)
+    private String round;
+
+    private Integer homeTeamExternalId;
+
+    private Integer awayTeamExternalId;
+
+    @Column(length = 20)
+    private String externalStatus;
 }

@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface StadiumRepository extends JpaRepository<Stadium, Integer> {
-
     Stadium findStadiumById(Integer id);
+    Stadium findStadiumByNameIgnoreCaseAndCityIgnoreCase(String name, String city);
 }

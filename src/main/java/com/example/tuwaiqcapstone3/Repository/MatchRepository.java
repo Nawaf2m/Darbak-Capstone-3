@@ -8,7 +8,6 @@ import java.util.List;
 
 @Repository
 public interface MatchRepository extends JpaRepository<Match, Integer> {
-
     Match findMatchById(Integer id);
 
     List<Match> findMatchesByStadium_Id(Integer stadiumId);
@@ -18,4 +17,6 @@ public interface MatchRepository extends JpaRepository<Match, Integer> {
     List<Match> findMatchesByStadium_CityIgnoreCase(String city);
 
     List<Match> findDistinctMatchesByUsers_Id(Integer userId);
+
+    Match findMatchByExternalFixtureId(Integer externalFixtureId);
 }
