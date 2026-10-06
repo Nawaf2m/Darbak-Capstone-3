@@ -53,7 +53,7 @@ public class RidePerticipantController {
 
     @GetMapping("/ride/{ride_id}/role/{role}")
     public ResponseEntity<?> GetParticipantsByRoleInARideInteger(@PathVariable Integer ride_id, @PathVariable String role) {
-        List<RidePerticipant> ridePerticipants = ridePerticipantService.GetParticipantsByRoleInARideInteger(ride_id, role);
+        List<RidePerticipant> ridePerticipants = ridePerticipantService.GetParticipantsByRoleInARide(ride_id, role);
         return ResponseEntity.status(200).body(ridePerticipants);
     }
 

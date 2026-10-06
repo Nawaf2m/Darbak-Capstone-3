@@ -1,6 +1,7 @@
 package com.example.tuwaiqcapstone3.Service;
 
 import com.example.tuwaiqcapstone3.API.ApiException;
+import com.example.tuwaiqcapstone3.DTO.AiReviewCheckDTO;
 import com.example.tuwaiqcapstone3.DTO.ReviewDTO;
 import com.example.tuwaiqcapstone3.Model.Review;
 import com.example.tuwaiqcapstone3.Model.Ride;
@@ -22,6 +23,7 @@ public class ReviewService {
     private final RideRepository rideRepository;
     private final UserRepository userRepository;
     private final RidePerticipantRepository ridePerticipantRepository;
+    private final AiService aiService;
 
 
     public List<Review> getAllReviews(){
@@ -52,6 +54,11 @@ public class ReviewService {
 
         if (reviewRepository.existsByRideIdAndReviewerId(ride.getId(), passenger.getId())) {
             throw new ApiException("You already reviewed this ride");
+        }
+
+        AiReviewCheckDTO response = aiService.checkInappropriateReview(reviewDTO.getComment());
+        if(response.getInappropriate()){
+            throw new ApiException("your comment is in propriety because :"+response.getReason());
         }
 
         Review review = new Review(null, reviewDTO.getRating(), reviewDTO.getComment(), null, passenger, ride.getDriver(), ride);

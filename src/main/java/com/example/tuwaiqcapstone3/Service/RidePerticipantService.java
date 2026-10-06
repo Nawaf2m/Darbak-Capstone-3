@@ -121,7 +121,7 @@ public class RidePerticipantService {
         return ridePerticipants;
     }
 
-    public List<RidePerticipant> GetParticipantsByRoleInARideInteger(Integer ride_id, String role) {
+    public List<RidePerticipant> GetParticipantsByRoleInARide(Integer ride_id, String role) {
         Ride ride = rideRepository.findRideById(ride_id);
 
         if (ride == null) {
