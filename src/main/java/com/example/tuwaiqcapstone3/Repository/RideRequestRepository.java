@@ -16,4 +16,6 @@ public interface RideRequestRepository extends JpaRepository<RideRequest,Integer
 
     List<RideRequest> findRideRequestByPassenger(User user);
     List<RideRequest> findRideRequestByPassengerAndStatus(User user,String status);
+
+    List<RideRequest> findRideRequestByRideAndPassenger(Ride ride, User passenger);
 }

@@ -30,47 +30,44 @@ public class ReviewService {
         return reviewRepository.findAll();
     }
 
+    // Allows completed-ride reviews between the driver and an enrolled passenger.
     public void addReview(ReviewDTO reviewDTO){
         Ride ride = rideRepository.findRideById(reviewDTO.getRideId());
         if (ride == null) {
             throw new ApiException("Ride not found");
         }
 
-        User passenger = userRepository.findUserById(reviewDTO.getPassengerId());
-        if (passenger == null) {
-            throw new ApiException("Passenger not found");
+        User reviewer = userRepository.findUserById(reviewDTO.getReviewerId());
+        if (reviewer == null) {
+            throw new ApiException("Reviewer not found");
         }
 
-        if (ride.getDriver().getId().equals(passenger.getId())) {
-            throw new ApiException("The driver cannot review his own ride");
+        User reviewedUser = userRepository.findUserById(reviewDTO.getReviewedUserId());
+        if (reviewedUser == null) {
+            throw new ApiException("Reviewed user not found");
         }
 
-        if (!"completed".equals(ride.getStatus())) {
-            throw new ApiException("You can review a ride only after it is completed");
-        }
-        if (!ridePerticipantRepository.existsByRideIdAndUserId(ride.getId(), passenger.getId())) {
-            throw new ApiException("You did not join this ride");
+        validateReviewParticipants(ride, reviewer, reviewedUser);
+
+        if (reviewRepository.existsByRideIdAndReviewerIdAndReviewedUserId(ride.getId(), reviewer.getId(), reviewedUser.getId())) {
+            throw new ApiException("You already reviewed this user for this ride");
         }
 
-        if (reviewRepository.existsByRideIdAndReviewerId(ride.getId(), passenger.getId())) {
-            throw new ApiException("You already reviewed this ride");
-        }
+        validateComment(reviewDTO.getComment());
 
-        AiReviewCheckDTO response = aiService.checkInappropriateReview(reviewDTO.getComment());
-        if(response.getInappropriate()){
-            throw new ApiException("your comment is in propriety because :"+response.getReason());
-        }
-
-        Review review = new Review(null, reviewDTO.getRating(), reviewDTO.getComment(), null, passenger, ride.getDriver(), ride);
+        Review review = new Review(null, reviewDTO.getRating(), reviewDTO.getComment(), null, reviewer, reviewedUser, ride);
         reviewRepository.save(review);
 
     }
 
+    // Updates a review after checking its original participants and moderating the new comment.
     public void updateReview(Integer id, Review updatedReview) {
         Review review = reviewRepository.findReviewById(id);
         if (review == null) {
             throw new ApiException("Review not found");
         }
+        validateReviewParticipants(review.getRide(), review.getReviewer(), review.getReviewedUser());
+        validateComment(updatedReview.getComment());
         review.setRating(updatedReview.getRating());
         review.setComment(updatedReview.getComment());
         reviewRepository.save(review);
@@ -82,5 +79,42 @@ public class ReviewService {
             throw new ApiException("Review not found");
         }
         reviewRepository.delete(review);
+    }
+
+    // Checks that the review is between the ride driver and one of their passengers.
+    private void validateReviewParticipants(Ride ride, User reviewer, User reviewedUser) {
+        if (!"completed".equals(ride.getStatus())) {
+            throw new ApiException("You can review a ride only after it is completed");
+        }
+
+        if (reviewer.getId().equals(reviewedUser.getId())) {
+            throw new ApiException("You cannot review yourself");
+        }
+
+        boolean reviewerIsDriver = ride.getDriver().getId().equals(reviewer.getId());
+        boolean reviewedUserIsDriver = ride.getDriver().getId().equals(reviewedUser.getId());
+        if (reviewerIsDriver == reviewedUserIsDriver) {
+            throw new ApiException("Reviews must be between the ride driver and a passenger");
+        }
+
+        Integer passengerId = reviewerIsDriver ? reviewedUser.getId() : reviewer.getId();
+        if (!ridePerticipantRepository.existsByRideIdAndUserIdAndRole(ride.getId(), passengerId, "passenger")) {
+            throw new ApiException("Passenger did not join this ride");
+        }
+    }
+
+    // Moderates written comments while allowing a rating without a comment.
+    private void validateComment(String comment) {
+        if (comment == null || comment.isBlank()) {
+            return;
+        }
+
+        AiReviewCheckDTO response = aiService.checkInappropriateReview(comment);
+        if (response == null || response.getInappropriate() == null) {
+            throw new ApiException("AI review check is unavailable");
+        }
+        if (response.getInappropriate()) {
+            throw new ApiException("Comment is inappropriate: " + response.getReason());
+        }
     }
 }

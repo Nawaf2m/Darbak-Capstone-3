@@ -23,6 +23,7 @@ public class RideRequestService {
     private final UserRepository userRepository;
     private final RidePerticipantRepository ridePerticipantRepository;
     private final WhatsAppService whatsAppService;
+    private final RidePerticipantService ridePerticipantService;
 
     public List<RideRequest> getRideRequests(){
         List<RideRequest> rideRequests = rideRequestRepository.findAll();
@@ -32,6 +33,7 @@ public class RideRequestService {
         return rideRequests;
     }
 
+    // Creates a pending request only when the passenger can book the ride.
     public void addRideRequest(Integer user_id,Integer ride_id,RideRequest rideRequest){
 
         Ride ride = rideRepository.findRideById(ride_id);
@@ -46,10 +48,24 @@ public class RideRequestService {
             throw new ApiException("passenger id not found");
         }
 
-        if(ride.getAvailableSeats()<=0){
-            throw new ApiException("the ride is full ");
+        ridePerticipantService.validateRideForBooking(ride);
+
+        if (ride.getDriver().getId().equals(user_id)) {
+            throw new ApiException("driver cannot join their own ride");
         }
 
+        if (ridePerticipantRepository.existsByRideIdAndUserId(ride_id, user_id)) {
+            throw new ApiException("passenger already joined this ride");
+        }
+
+        List<RideRequest> requests = rideRequestRepository.findRideRequestByRideAndPassenger(ride, user);
+        for (RideRequest request : requests) {
+            if ("pending".equals(request.getStatus()) || "accepted".equals(request.getStatus())) {
+                throw new ApiException("passenger already has a pending or accepted request");
+            }
+        }
+
+        rideRequest.setId(null);
         rideRequest.setRide(ride);
         rideRequest.setPassenger(user);
         rideRequest.setStatus("pending");
@@ -57,6 +73,7 @@ public class RideRequestService {
         whatsAppService.notifyDriverNewRequest(ride, user);
     }
 
+    // Routes status changes through the same checks used by acceptance and rejection.
     public void updateRideRequest(Integer id, RideRequest rideRequest){
         RideRequest oldRideRequest = rideRequestRepository.findRideRequestById(id);
 
@@ -64,23 +81,21 @@ public class RideRequestService {
             throw new ApiException("ride request id not found");
         }
 
-        Ride ride = rideRepository.findRideById(rideRequest.getRide().getId());
-
-        if(ride==null){
-            throw new ApiException("ride id not found");
+        if (!"pending".equals(oldRideRequest.getStatus())) {
+            throw new ApiException("only pending requests can be updated");
         }
 
-        User user = userRepository.findUserById(rideRequest.getPassenger().getId());
-
-        if(user==null){
-            throw new ApiException("passenger id not found");
+        Integer driverId = oldRideRequest.getRide().getDriver().getId();
+        if ("accepted".equals(rideRequest.getStatus())) {
+            AcceptRequest(id, driverId);
+        } else if ("rejected".equals(rideRequest.getStatus())) {
+            RejectRequest(id, driverId);
+        } else if (!"pending".equals(rideRequest.getStatus())) {
+            throw new ApiException("status must be pending, accepted, or rejected");
         }
-
-        oldRideRequest.setStatus(rideRequest.getStatus());
-
-        rideRequestRepository.save(oldRideRequest);
     }
 
+    // Deletes a request and restores its seat if it was an accepted booking.
     public void deleteRideRequest(Integer id){
         RideRequest rideRequest = rideRequestRepository.findRideRequestById(id);
 
@@ -88,7 +103,16 @@ public class RideRequestService {
             throw new ApiException("ride request id not found");
         }
 
-        rideRequestRepository.delete(rideRequest);
+        if ("accepted".equals(rideRequest.getStatus())) {
+            RidePerticipant participant = ridePerticipantRepository.findRidePerticipantByUserAndRide(
+                    rideRequest.getPassenger(), rideRequest.getRide());
+            if (participant == null) {
+                throw new ApiException("accepted request has no participant");
+            }
+            ridePerticipantService.deleteRidePerticipant(participant.getId());
+        } else {
+            rideRequestRepository.delete(rideRequest);
+        }
     }
 
     public List<RideRequest> ViewRequestsForARide(Integer ride_id){
@@ -120,6 +144,7 @@ public class RideRequestService {
     }
 
 
+    // Accepts a pending request and reserves exactly one passenger seat.
     public void AcceptRequest(Integer request_id,Integer driver_id){
         RideRequest rideRequest = rideRequestRepository.findRideRequestById(request_id);
 
@@ -127,7 +152,7 @@ public class RideRequestService {
             throw new ApiException("request not found");
         }
 
-        if(!rideRequest.getStatus().equalsIgnoreCase("pending")){
+        if(!"pending".equals(rideRequest.getStatus())){
             throw new ApiException("the request is not pending");
         }
 
@@ -145,28 +170,11 @@ public class RideRequestService {
             throw new ApiException("driver dont own the ride");
         }
 
-        if(ride.getAvailableSeats()<=0){
-            throw new ApiException("the ride is full ");
-        }
-
-
-        rideRequest.setStatus("accepted");
-        rideRequestRepository.save(rideRequest);
-
-        RidePerticipant ridePerticipant = new RidePerticipant();
-
-        ridePerticipant.setUser(rideRequest.getPassenger());
-        ridePerticipant.setRide(rideRequest.getRide());
-        ridePerticipant.setRole("passenger");
-        ridePerticipantRepository.save(ridePerticipant);
-
-        ride.getRidePerticipants().add(ridePerticipant);
-        ride.setAvailableSeats(ride.getAvailableSeats()-1);
-        rideRepository.save(rideRequest.getRide());
-        whatsAppService.notifyPassengerRequestAccepted(ride, rideRequest.getPassenger());
+        ridePerticipantService.addPassengerToRide(ride, rideRequest.getPassenger(), rideRequest);
     }
 
 
+    // Rejects a pending request without reserving a seat.
     public void RejectRequest(Integer request_id,Integer driver_id){
         RideRequest rideRequest = rideRequestRepository.findRideRequestById(request_id);
 
@@ -174,7 +182,7 @@ public class RideRequestService {
             throw new ApiException("request not found");
         }
 
-        if(!rideRequest.getStatus().equalsIgnoreCase("pending")){
+        if(!"pending".equals(rideRequest.getStatus())){
             throw new ApiException("the request is not pending");
         }
 
@@ -192,6 +200,7 @@ public class RideRequestService {
             throw new ApiException("driver dont own the ride");
         }
 
+        ridePerticipantService.validateRideBeforeDeparture(ride);
         rideRequest.setStatus("rejected");
         rideRequestRepository.save(rideRequest);
         whatsAppService.notifyPassengerRequestRejected(ride, rideRequest.getPassenger());
@@ -204,7 +213,7 @@ public class RideRequestService {
             throw new ApiException("request not found");
         }
 
-        if(!rideRequest.getStatus().equalsIgnoreCase("pending")){
+        if(!"pending".equals(rideRequest.getStatus())){
             throw new ApiException("the request is not pending");
         }
 

@@ -12,7 +12,7 @@ public interface ReviewRepository extends JpaRepository<Review,Integer> {
 
     Review findReviewById(Integer id);
 
-    boolean existsByRideIdAndReviewerId(Integer rideId, Integer reviewerId);
+    boolean existsByRideIdAndReviewerIdAndReviewedUserId(Integer rideId, Integer reviewerId, Integer reviewedUserId);
 
     @Query("select avg(r.rating) from Review r where r.reviewedUser.id = :userId")
     Double findAverageRatingByUserId(Integer userId);

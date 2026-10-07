@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -37,6 +38,7 @@ public class RidePerticipant {
     @Column(nullable = false)
     @NotEmpty(message = "role can not be empty")
     @Size(min = 3, max = 10, message = "role length must be between 3 and 10")
+    @Pattern(regexp = "passenger|driver", message = "role must be passenger or driver")
     private String role;
 
     @CreationTimestamp

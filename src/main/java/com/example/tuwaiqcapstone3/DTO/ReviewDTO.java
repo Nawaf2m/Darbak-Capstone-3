@@ -6,16 +6,21 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class ReviewDTO {
 
     @NotNull(message = "Ride id is required")
     private Integer rideId;
 
-    @NotNull(message = "Passenger id is required")
-    private Integer passengerId;
+    @NotNull(message = "Reviewer id is required")
+    private Integer reviewerId;
+
+    @NotNull(message = "Reviewed user id is required")
+    private Integer reviewedUserId;
 
     @NotNull(message = "Rating is required")
     @Min(value = 1, message = "Rating must be at least 1")

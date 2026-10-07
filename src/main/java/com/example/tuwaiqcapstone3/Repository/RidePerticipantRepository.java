@@ -16,6 +16,8 @@ public interface RidePerticipantRepository extends JpaRepository<RidePerticipant
 
     boolean existsByRideIdAndUserId(Integer rideId, Integer userId);
 
+    boolean existsByRideIdAndUserIdAndRole(Integer rideId, Integer userId, String role);
+
     RidePerticipant findRidePerticipantByUserAndRide(User user, Ride ride);
 
     List<RidePerticipant> findRidePerticipantByRide(Ride ride);
