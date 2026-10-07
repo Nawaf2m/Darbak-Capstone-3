@@ -61,7 +61,7 @@ public class MatchController {
     }
 
 
-    @GetMapping("/match/{match1_id}/{match2_id}")
+    @GetMapping("/attendance-check/{match1_id}/{match2_id}")
     public ResponseEntity<?> attendanceFeasibilityCheck(@PathVariable Integer match1_id, @PathVariable Integer match2_id){
         AiMatchPlanDTO aiMatchPlanDTO =  aiService.checkTwoMatches(match1_id,match2_id);
         return ResponseEntity.status(200).body(aiMatchPlanDTO);
