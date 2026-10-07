@@ -58,7 +58,7 @@ public class AdminService {
             throw new ApiException("User not found");
         }
 
-        if (user.isBanned()) {
+        if (user.getBanned()) {
             throw new ApiException("User is already banned");
         }
 

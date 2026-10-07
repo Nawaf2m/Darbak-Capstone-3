@@ -67,7 +67,7 @@ public class UserService {
             throw new ApiException("Invalid email or password");
         }
 
-        if (user.isBanned()) {
+        if (user.getBanned()) {
             throw new ApiException("User is banned");
         }
     }

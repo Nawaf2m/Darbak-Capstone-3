@@ -53,7 +53,7 @@ public class User {
     private LocalDateTime createdAt;
 
     @Column(nullable = false)
-    private boolean banned = false;
+    private Boolean banned;
 
 
     @OneToMany(mappedBy = "driver")
