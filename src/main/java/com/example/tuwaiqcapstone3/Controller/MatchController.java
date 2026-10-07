@@ -1,6 +1,8 @@
 package com.example.tuwaiqcapstone3.Controller;
 
+import com.example.tuwaiqcapstone3.DTO.AiMatchPlanDTO;
 import com.example.tuwaiqcapstone3.Model.Match;
+import com.example.tuwaiqcapstone3.Service.AiService;
 import com.example.tuwaiqcapstone3.Service.MatchService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 public class MatchController {
 
     private final MatchService matchService;
+    private final AiService aiService;
 
     @GetMapping("/get")
     public ResponseEntity<?> getMatches() {
@@ -55,5 +58,12 @@ public class MatchController {
     public ResponseEntity<?> deleteMatch(@PathVariable Integer id) {
         matchService.deleteMatch(id);
         return ResponseEntity.status(200).body("match deleted successfully");
+    }
+
+
+    @GetMapping("/attendance-check/{match1_id}/{match2_id}")
+    public ResponseEntity<?> attendanceFeasibilityCheck(@PathVariable Integer match1_id, @PathVariable Integer match2_id){
+        AiMatchPlanDTO aiMatchPlanDTO =  aiService.checkTwoMatches(match1_id,match2_id);
+        return ResponseEntity.status(200).body(aiMatchPlanDTO);
     }
 }

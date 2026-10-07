@@ -121,4 +121,9 @@ public class UserController {
     public ResponseEntity<?> summarizeUserReviews(@PathVariable Integer userId) {
         return ResponseEntity.status(200).body(aiService.summarizeUserReviews(userId));
     }
+
+    @GetMapping("/ai-matchday-plan/{userId}/{lang}")
+    public ResponseEntity<?> generateMatchdayPlan(@PathVariable Integer userId, @PathVariable String lang) {
+        return ResponseEntity.status(200).body(aiService.generateMatchdayPlan(userId, lang));
+    }
 }
