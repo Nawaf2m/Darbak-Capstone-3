@@ -23,6 +23,11 @@ public class RideController {
         return ResponseEntity.status(200).body(rideService.getRides());
     }
 
+    @GetMapping("/map/{rideId}")
+    public ResponseEntity<?> getRideMapDetails(@PathVariable Integer rideId) {
+        return ResponseEntity.status(200).body(rideService.getRideMapDetails(rideId));
+    }
+
     @PostMapping("/add/{driverId}/{matchId}/{carId}")
     public ResponseEntity<?> addRide(@PathVariable Integer driverId, @PathVariable Integer matchId, @PathVariable Integer carId, @RequestBody @Valid Ride ride) {
         rideService.addRide(driverId, matchId, carId, ride);

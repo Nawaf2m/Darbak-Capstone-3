@@ -2,9 +2,11 @@ package com.example.tuwaiqcapstone3.Service;
 
 import com.example.tuwaiqcapstone3.API.ApiException;
 import com.example.tuwaiqcapstone3.DTO.RecommendedRideDTO;
+import com.example.tuwaiqcapstone3.DTO.RideMapDetailsDTO;
 import com.example.tuwaiqcapstone3.Model.Car;
 import com.example.tuwaiqcapstone3.Model.Match;
 import com.example.tuwaiqcapstone3.Model.Ride;
+import com.example.tuwaiqcapstone3.Model.Stadium;
 import com.example.tuwaiqcapstone3.Model.User;
 import com.example.tuwaiqcapstone3.Repository.*;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +40,38 @@ public class RideService {
         }
 
         return rides;
+    }
+
+    // Returns the meeting point, stadium, and directions links for a ride.
+    public RideMapDetailsDTO getRideMapDetails(Integer rideId) {
+        Ride ride = rideRepository.findRideById(rideId);
+
+        if (ride == null) {
+            throw new ApiException("ride not found");
+        }
+
+        Match match = ride.getMatch();
+        Stadium stadium = match == null ? null : match.getStadium();
+
+        if (stadium == null || stadium.getLatitude() == null || stadium.getLongitude() == null
+                || ride.getMeetingLatitude() == null || ride.getMeetingLongitude() == null) {
+            throw new ApiException("ride or stadium location is not available");
+        }
+
+        String meeting = ride.getMeetingLatitude() + "%2C" + ride.getMeetingLongitude();
+        String destination = stadium.getLatitude().toPlainString()
+                + "%2C" + stadium.getLongitude().toPlainString();
+        String directions = "https://www.google.com/maps/dir/?api=1&travelmode=driving";
+
+        return new RideMapDetailsDTO(
+                ride.getId(), match.getId(), ride.getMeetingPoint(),
+                ride.getMeetingLatitude(), ride.getMeetingLongitude(),
+                stadium.getId(), stadium.getName(),
+                stadium.getLatitude(), stadium.getLongitude(),
+                directions + "&destination=" + meeting,
+                directions + "&destination=" + destination,
+                directions + "&origin=" + meeting + "&destination=" + destination
+        );
     }
 
     public void addRide(Integer driverId, Integer matchId, Integer carId, Ride ride) {

@@ -58,9 +58,13 @@ public class Ride {
     private String meetingPoint;
 
     @NotNull(message = "meeting latitude can not be null")
+    @DecimalMin(value = "-90.0", message = "meeting latitude must be at least -90")
+    @DecimalMax(value = "90.0", message = "meeting latitude must be at most 90")
     private Double meetingLatitude;
 
     @NotNull(message = "meeting longitude can not be null")
+    @DecimalMin(value = "-180.0", message = "meeting longitude must be at least -180")
+    @DecimalMax(value = "180.0", message = "meeting longitude must be at most 180")
     private Double meetingLongitude;
 
     @NotEmpty(message = "destination can not be empty")
