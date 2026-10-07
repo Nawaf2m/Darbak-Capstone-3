@@ -3,9 +3,12 @@ package com.example.tuwaiqcapstone3.Controller;
 import com.example.tuwaiqcapstone3.Model.Stadium;
 import com.example.tuwaiqcapstone3.Service.StadiumService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/stadium")
@@ -40,5 +43,11 @@ public class StadiumController {
     public ResponseEntity<?> deleteStadium(@PathVariable Integer id) {
         stadiumService.deleteStadium(id);
         return ResponseEntity.status(200).body("stadium deleted successfully");
+    }
+
+    @PostMapping("/add-all")
+    public ResponseEntity<?> addAllStadiums(@RequestBody @Valid List<@NotNull @Valid Stadium> stadiums) {
+        Integer addedCount = stadiumService.addAllStadiums(stadiums);
+        return ResponseEntity.status(200).body("stadiums added successfully: " + addedCount);
     }
 }

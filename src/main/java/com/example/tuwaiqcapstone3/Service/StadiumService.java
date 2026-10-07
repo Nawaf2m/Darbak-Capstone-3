@@ -3,6 +3,7 @@ package com.example.tuwaiqcapstone3.Service;
 import com.example.tuwaiqcapstone3.API.ApiException;
 import com.example.tuwaiqcapstone3.Model.Stadium;
 import com.example.tuwaiqcapstone3.Repository.StadiumRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -56,5 +57,33 @@ public class StadiumService {
         }
 
         stadiumRepository.delete(stadium);
+    }
+
+    @Transactional
+    public Integer addAllStadiums(List<Stadium> stadiums) {
+        if (stadiums == null || stadiums.isEmpty()) {
+            throw new ApiException("stadium list is required");
+        }
+
+        int addedCount = 0;
+
+        for (Stadium stadium : stadiums) {
+            if (stadium.getName() == null || stadium.getName().isBlank()) {
+                throw new ApiException("stadium name is required");
+            }
+
+            String name = stadium.getName().trim();
+
+            if (stadiumRepository.existsByNameIgnoreCase(name)) {
+                continue;
+            }
+
+            stadium.setId(null);
+            stadium.setName(name);
+            stadiumRepository.save(stadium);
+            addedCount++;
+        }
+
+        return addedCount;
     }
 }
