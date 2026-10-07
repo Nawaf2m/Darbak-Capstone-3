@@ -126,4 +126,12 @@ public class UserController {
     public ResponseEntity<?> generateMatchdayPlan(@PathVariable Integer userId, @PathVariable String lang) {
         return ResponseEntity.status(200).body(aiService.generateMatchdayPlan(userId, lang));
     }
+
+    @PostMapping("/send-plan/{userId}")
+    public ResponseEntity<?> sendPlanByEmail(@PathVariable Integer userId) {
+        userService.sendPlanByEmail(userId);
+        return ResponseEntity.status(200).body(new ApiResponse("Match plan sent to your email successfully"));
+    }
+
+
 }
