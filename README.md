@@ -122,5 +122,4 @@ All endpoints use the prefix `/api/v1`.
 | PUT | `/Ride/cancel/{rideId}/{driverId}` | Cancel a ride |
 | GET | `/RidePerticipant/passenger-count/{rideId}` | Count passengers |
 | GET | `/car/availability-conflict/{carId}` | Check car availability |
-| GET | `/Ride/map/{rideId}` | Get Google Maps directions links |
 | GET | `/user/review-summary/{userId}` | Generate an AI-powered review summary |
