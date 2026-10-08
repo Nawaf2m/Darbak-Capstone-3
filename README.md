@@ -104,3 +104,23 @@ Car availability requires `departure` and `expectedArrival` query parameters in 
 Review creation requires `rideId`, `reviewerId`, `reviewedUserId`, and `rating` (1–5); `comment` is optional. Reviews are allowed between a completed ride's driver and an enrolled passenger. Written comments are moderated by AI.
 
 AI attendance results are estimates; the current check does not use live traffic data. WhatsApp and welcome emails are triggered automatically by the relevant workflows.
+
+## My Contributions — Nawaf Alghamdi
+
+Developed 11 feature endpoints for **Darbak**, focusing on ride management, vehicle availability, Google Maps integration, and AI-powered review summaries.
+
+All endpoints use the prefix `/api/v1`.
+
+| Method | Path | Purpose |
+|---|---|---|
+| POST | `/Ride/add/{driverId}/{matchId}/{carId}` | Create a ride with availability checks |
+| GET | `/Ride/search/{matchId}/{date}/{seats}` | Find suitable rides |
+| GET | `/Ride/available` | List available rides |
+| GET | `/Ride/match/{matchId}` | Get rides for a match |
+| GET | `/Ride/driver/{driverId}` | Get a driver's rides |
+| PUT | `/Ride/complete/{rideId}/{driverId}` | Complete a ride |
+| PUT | `/Ride/cancel/{rideId}/{driverId}` | Cancel a ride |
+| GET | `/RidePerticipant/passenger-count/{rideId}` | Count passengers |
+| GET | `/car/availability-conflict/{carId}` | Check car availability |
+| GET | `/Ride/map/{rideId}` | Get Google Maps directions links |
+| GET | `/user/review-summary/{userId}` | Generate an AI-powered review summary |
