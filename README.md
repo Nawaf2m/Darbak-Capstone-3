@@ -107,7 +107,7 @@ AI attendance results are estimates; the current check does not use live traffic
 
 ## My Contributions — Nawaf Alghamdi
 
-Developed 11 feature endpoints for **Darbak**, focusing on ride management, vehicle availability, Google Maps integration, and AI-powered review summaries.
+Developed 10 feature endpoints for **Darbak**, focusing on ride management, vehicle availability, and AI-powered review summaries.
 
 All endpoints use the prefix `/api/v1`.
 
