@@ -43,6 +43,7 @@ public class FootballService {
         try {
             response = RestClient.create(apiUrl).get().uri("/fixtures?league=7&season=2023").header("x-apisports-key", apiKey).retrieve().body(FootballResponseDTO.class);
         } catch (RestClientException e) {
+            e.printStackTrace();
             throw new ApiException("failed to fetch matches from football API");
         }
 
